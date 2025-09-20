@@ -2,14 +2,15 @@ import { createClient } from '@supabase/supabase-js'
 import { completeRoadmap } from './seedData'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
-if (!supabaseUrl || !supabaseKey) {
+if (!supabaseUrl || !supabaseServiceKey) {
   console.error('Missing Supabase environment variables')
+  console.error('Make sure SUPABASE_SERVICE_ROLE_KEY is set in your env.local file')
   process.exit(1)
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey)
+const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 async function seedRoadmap() {
   console.log('🌱 Starting JLPT N5 roadmap seeding...')

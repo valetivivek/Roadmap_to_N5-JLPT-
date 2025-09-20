@@ -19,7 +19,6 @@ import {
   ChevronRight
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
-import Protected from '@/components/Protected'
 
 interface Resource {
   id: string
@@ -255,24 +254,21 @@ export default function ResourcesPage() {
 
   if (isLoading) {
     return (
-      <Protected>
-        <div className="min-h-screen bg-gray-50">
-          <div className="container mx-auto px-4 py-8">
-            <div className="flex items-center justify-center min-h-96">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className="text-muted-foreground">Loading resources...</p>
-              </div>
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-96">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading resources...</p>
             </div>
           </div>
         </div>
-      </Protected>
+      </div>
     )
   }
 
   return (
-    <Protected>
-      <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
           <div className="mb-8">
@@ -480,6 +476,6 @@ export default function ResourcesPage() {
           )}
         </div>
       </div>
-    </Protected>
+    </div>
   )
 }
