@@ -64,7 +64,6 @@ export default function TopNav() {
   const navItems = [
     { href: '/', label: 'Home', icon: BookOpen },
     { href: '/roadmap', label: 'Roadmap', icon: BookOpen },
-    { href: '/dashboard', label: 'Dashboard', icon: BarChart3 },
   ]
 
   return (
@@ -110,6 +109,12 @@ export default function TopNav() {
                     </div>
                   </div>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard" className="flex items-center gap-2">
+                      <BarChart3 className="h-4 w-4" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/profile" className="flex items-center gap-2">
                       <User className="h-4 w-4" />

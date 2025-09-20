@@ -98,7 +98,7 @@ export default function DayTaskList({
                           onCheckedChange={(checked) => 
                             handleTaskToggle(task.id, checked as boolean)
                           }
-                          disabled={!isDemo && !onTaskToggle}
+                          disabled={!onTaskToggle}
                         />
                         <span className={`flex-1 text-sm ${isCompleted ? 'line-through text-muted-foreground' : ''}`}>
                           {task.label}
