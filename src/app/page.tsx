@@ -120,7 +120,7 @@ export default function HomePage() {
                 </span>
               </div>
               <Button asChild size="sm" variant="outline">
-                <Link href="/auth">Sign up to save progress</Link>
+                <Link href="/auth/signup">Sign up to save progress</Link>
               </Button>
             </div>
           </div>

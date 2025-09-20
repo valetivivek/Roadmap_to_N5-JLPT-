@@ -23,13 +23,13 @@ export default function Hero() {
           
           <div className="mb-12 flex flex-col gap-4 sm:flex-row sm:justify-center">
             <Button asChild size="lg" className="text-lg px-8 py-6">
-              <Link href="/roadmap">
-                Start Learning
+              <Link href="/auth/signup">
+                Start Now
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6">
-              <Link href="/dashboard">
-                View Dashboard
+              <Link href="/roadmap">
+                View Roadmap
               </Link>
             </Button>
           </div>

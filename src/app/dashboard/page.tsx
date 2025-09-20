@@ -1,16 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import Protected from '@/components/Protected'
 import ProgressBar from '@/components/ProgressBar'
-import WeeklyTrend from '@/components/WeeklyTrend'
-import CategoryBreakdown from '@/components/CategoryBreakdown'
+import DynamicWeeklyTrend from '@/components/DynamicWeeklyTrend'
+import DynamicCategoryBreakdown from '@/components/DynamicCategoryBreakdown'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useProgressStore } from '@/stores/useProgressStore'
 import { UserProgress } from '@/types'
 import { createClient } from '@/lib/supabase'
@@ -22,7 +19,6 @@ import {
   BookOpen,
   Clock,
   CheckCircle,
-  Mail,
   Loader2
 } from 'lucide-react'
 import Link from 'next/link'
@@ -32,11 +28,8 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [realUserProgress, setRealUserProgress] = useState<UserProgress | null>(null)
   const [user, setUser] = useState<any>(null)
+  const [profile, setProfile] = useState<any>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [showAuth, setShowAuth] = useState(false)
-  const [email, setEmail] = useState('')
-  const [authMessage, setAuthMessage] = useState('')
-  const [authLoading, setAuthLoading] = useState(false)
   const supabase = createClient()
 
   useEffect(() => {
@@ -48,6 +41,15 @@ export default function DashboardPage() {
         if (session?.user) {
           setUser(session.user)
           setIsAuthenticated(true)
+          
+          // Fetch profile data
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('display_name, email')
+            .eq('id', session.user.id)
+            .single()
+          setProfile(profileData)
+          
           // Load real user progress from database
           const { data: progress } = await supabase
             .from('progress')
@@ -109,30 +111,8 @@ export default function DashboardPage() {
     }
 
     loadUserProgress()
-  }, [loadDemoData, supabase.auth])
+  }, [loadDemoData, supabase])
 
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setAuthLoading(true)
-    setAuthMessage('')
-
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-        },
-      })
-      
-      if (error) throw error
-      
-      setAuthMessage('Check your email for the login link!')
-    } catch (error: any) {
-      setAuthMessage(error.message)
-    } finally {
-      setAuthLoading(false)
-    }
-  }
 
   if (isLoading) {
     return (
@@ -174,21 +154,14 @@ export default function DashboardPage() {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Welcome{profile?.display_name ? `, ${profile.display_name}` : ''}!
+                </h1>
                 <p className="text-gray-600 mt-2">
                   Track your JLPT N5 study progress
                 </p>
               </div>
               <div className="flex items-center gap-4">
-                {!isAuthenticated && (
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setShowAuth(!showAuth)}
-                  >
-                    <Mail className="h-4 w-4 mr-2" />
-                    Sign In
-                  </Button>
-                )}
                 {isDemo && (
                   <Badge variant="outline" className="bg-blue-50 text-blue-700">
                     Demo Mode
@@ -204,61 +177,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Authentication Form */}
-          {showAuth && !isAuthenticated && (
-            <Card className="mb-8">
-              <CardHeader>
-                <CardTitle>Sign In to Sync Your Progress</CardTitle>
-                <CardDescription>
-                  Create an account to save your progress across devices
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleAuth} className="space-y-4">
-                  <div>
-                    <Label htmlFor="email">Email address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="Enter your email"
-                      required
-                    />
-                  </div>
-
-                  {authMessage && (
-                    <Alert>
-                      <AlertDescription>{authMessage}</AlertDescription>
-                    </Alert>
-                  )}
-
-                  <div className="flex gap-2">
-                    <Button type="submit" disabled={authLoading}>
-                      {authLoading ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Sending...
-                        </>
-                      ) : (
-                        <>
-                          <Mail className="h-4 w-4 mr-2" />
-                          Send Magic Link
-                        </>
-                      )}
-                    </Button>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => setShowAuth(false)}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          )}
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -330,8 +248,34 @@ export default function DashboardPage() {
 
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <WeeklyTrend userProgress={displayProgress} />
-            <CategoryBreakdown userProgress={displayProgress} />
+            <Suspense fallback={
+              <Card>
+                <CardHeader>
+                  <CardTitle>Weekly Progress Trend</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 w-full flex items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                  </div>
+                </CardContent>
+              </Card>
+            }>
+              <DynamicWeeklyTrend userProgress={displayProgress} />
+            </Suspense>
+            <Suspense fallback={
+              <Card>
+                <CardHeader>
+                  <CardTitle>Progress by Category</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64 w-full flex items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                  </div>
+                </CardContent>
+              </Card>
+            }>
+              <DynamicCategoryBreakdown userProgress={displayProgress} />
+            </Suspense>
           </div>
 
           {/* Recent Activity */}

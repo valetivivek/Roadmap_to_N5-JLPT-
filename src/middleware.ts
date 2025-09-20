@@ -68,7 +68,7 @@ export async function middleware(req: NextRequest) {
   } = await supabase.auth.getSession()
 
   // Protected routes
-  const protectedRoutes = ['/dashboard', '/profile', '/settings']
+  const protectedRoutes = ['/dashboard', '/profile', '/settings', '/resources']
   const isProtectedRoute = protectedRoutes.some(route => 
     req.nextUrl.pathname.startsWith(route)
   )
@@ -79,7 +79,7 @@ export async function middleware(req: NextRequest) {
   }
 
   // If accessing auth routes with session, redirect to dashboard
-  const authRoutes = ['/auth']
+  const authRoutes = ['/auth/signin', '/auth/signup']
   const isAuthRoute = authRoutes.some(route => 
     req.nextUrl.pathname.startsWith(route)
   )

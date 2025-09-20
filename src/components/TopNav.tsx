@@ -27,6 +27,7 @@ export default function TopNav() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<any>(null)
+  const [profile, setProfile] = useState<any>(null)
   const router = useRouter()
   const supabase = createClient()
   const { isDemo, clearDemoData } = useProgressStore()
@@ -36,14 +37,36 @@ export default function TopNav() {
       const { data: { session } } = await supabase.auth.getSession()
       setIsAuthenticated(!!session)
       setUser(session?.user)
+      
+      if (session?.user) {
+        // Fetch profile data
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('display_name, email')
+          .eq('id', session.user.id)
+          .single()
+        setProfile(profileData)
+      }
     }
 
     checkAuth()
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setIsAuthenticated(!!session)
         setUser(session?.user)
+        
+        if (session?.user) {
+          // Fetch profile data
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('display_name, email')
+            .eq('id', session.user.id)
+            .single()
+          setProfile(profileData)
+        } else {
+          setProfile(null)
+        }
       }
     )
 
@@ -62,8 +85,8 @@ export default function TopNav() {
   }
 
   const navItems = [
-    { href: '/', label: 'Home', icon: BookOpen },
     { href: '/roadmap', label: 'Roadmap', icon: BookOpen },
+    { href: '/resources', label: 'Resources', icon: BookOpen },
   ]
 
   return (
@@ -71,7 +94,7 @@ export default function TopNav() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <BookOpen className="h-6 w-6 text-blue-600" />
             <span className="text-xl font-bold">Roadmap to N5</span>
           </Link>
@@ -96,15 +119,17 @@ export default function TopNav() {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <User className="h-4 w-4" />
+                    <div className="h-6 w-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-medium">
+                      {profile?.display_name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
+                    </div>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end">
                   <div className="flex items-center justify-start gap-2 p-2">
                     <div className="flex flex-col space-y-1 leading-none">
-                      <p className="font-medium">{user?.email}</p>
+                      <p className="font-medium">{profile?.display_name || user?.email}</p>
                       <p className="text-xs text-muted-foreground">
-                        {isDemo ? 'Demo Mode' : 'Authenticated'}
+                        {isDemo ? 'Demo Mode' : user?.email}
                       </p>
                     </div>
                   </div>
@@ -113,6 +138,18 @@ export default function TopNav() {
                     <Link href="/dashboard" className="flex items-center gap-2">
                       <BarChart3 className="h-4 w-4" />
                       Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/roadmap" className="flex items-center gap-2">
+                      <BookOpen className="h-4 w-4" />
+                      Roadmap
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/resources" className="flex items-center gap-2">
+                      <BookOpen className="h-4 w-4" />
+                      Resources
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
@@ -137,10 +174,10 @@ export default function TopNav() {
             ) : (
               <div className="flex items-center gap-2">
                 <Button asChild variant="outline" size="sm">
-                  <Link href="/auth">Sign In</Link>
+                  <Link href="/auth/signin">Sign In</Link>
                 </Button>
                 <Button asChild size="sm">
-                  <Link href="/auth">Get Started</Link>
+                  <Link href="/auth/signup">Get Started</Link>
                 </Button>
               </div>
             )}

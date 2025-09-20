@@ -8,6 +8,9 @@ import { Button } from '@/components/ui/button'
 import { ChevronDown, ChevronRight, Star } from 'lucide-react'
 import { RoadmapDay, TaskCategory } from '@/types'
 import { getCategoryColor, getCategoryLabel } from '@/lib/utils'
+import { createClient } from '@/lib/supabase'
+import { toast } from 'sonner'
+import ResourceList from './ResourceList'
 
 interface DayTaskListProps {
   day: RoadmapDay
@@ -23,8 +26,11 @@ export default function DayTaskList({
   onTaskToggle 
 }: DayTaskListProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [localCompletedTasks, setLocalCompletedTasks] = useState(completedTasks)
+  const [loadingTasks, setLoadingTasks] = useState<Set<string>>(new Set())
+  const supabase = createClient()
   
-  const completedCount = day.tasks.filter(task => completedTasks.has(task.id)).length
+  const completedCount = day.tasks.filter(task => localCompletedTasks.has(task.id)).length
   const totalTasks = day.tasks.length
   const progressPercentage = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0
   
@@ -37,9 +43,70 @@ export default function DayTaskList({
     return acc
   }, {} as Record<TaskCategory, typeof day.tasks>)
 
-  const handleTaskToggle = (taskId: string, completed: boolean) => {
-    if (onTaskToggle) {
-      onTaskToggle(taskId, completed)
+  const handleTaskToggle = async (taskId: string, completed: boolean) => {
+    if (isDemo) {
+      // For demo mode, just call the callback
+      if (onTaskToggle) {
+        onTaskToggle(taskId, completed)
+      }
+      return
+    }
+
+    setLoadingTasks(prev => new Set(prev).add(taskId))
+    
+    // Optimistic update
+    setLocalCompletedTasks(prev => {
+      const newSet = new Set(prev)
+      if (completed) {
+        newSet.add(taskId)
+      } else {
+        newSet.delete(taskId)
+      }
+      return newSet
+    })
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        throw new Error('Not authenticated')
+      }
+
+      if (completed) {
+        // Insert progress
+        const { error } = await supabase
+          .from('progress')
+          .upsert({
+            user_id: session.user.id,
+            task_id: taskId,
+            completed_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id,task_id'
+          })
+
+        if (error) throw error
+        toast.success('Task completed!')
+      } else {
+        // Delete progress
+        const { error } = await supabase
+          .from('progress')
+          .delete()
+          .eq('user_id', session.user.id)
+          .eq('task_id', taskId)
+
+        if (error) throw error
+        toast.success('Task unchecked!')
+      }
+    } catch (error: any) {
+      // Revert optimistic update
+      setLocalCompletedTasks(completedTasks)
+      toast.error(error.message || 'Failed to update task')
+      console.error('Error updating task:', error)
+    } finally {
+      setLoadingTasks(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(taskId)
+        return newSet
+      })
     }
   }
 
@@ -81,32 +148,41 @@ export default function DayTaskList({
                     {getCategoryLabel(category)}
                   </h4>
                   <Badge variant="secondary" className="text-xs">
-                    {tasks.filter(t => completedTasks.has(t.id)).length}/{tasks.length}
+                    {tasks.filter(t => localCompletedTasks.has(t.id)).length}/{tasks.length}
                   </Badge>
                 </div>
                 
                 <div className="space-y-2 pl-4">
                   {tasks.map((task) => {
-                    const isCompleted = completedTasks.has(task.id)
+                    const isCompleted = localCompletedTasks.has(task.id)
+                    const isLoading = loadingTasks.has(task.id)
                     return (
                       <div
                         key={task.id}
                         className="flex items-center gap-3 rounded-md p-2 hover:bg-muted/50"
                       >
                         <Checkbox
+                          id={`task-${task.id}`}
                           checked={isCompleted}
                           onCheckedChange={(checked) => 
                             handleTaskToggle(task.id, checked as boolean)
                           }
-                          disabled={!onTaskToggle}
+                          disabled={isLoading || (!onTaskToggle && !isDemo)}
+                          className="pointer-events-auto"
                         />
-                        <span className={`flex-1 text-sm ${isCompleted ? 'line-through text-muted-foreground' : ''}`}>
+                        <label 
+                          htmlFor={`task-${task.id}`}
+                          className={`flex-1 text-sm cursor-pointer ${isCompleted ? 'line-through text-muted-foreground' : ''}`}
+                        >
                           {task.label}
-                        </span>
+                        </label>
                         <div className="flex items-center gap-1">
                           {Array.from({ length: task.points }, (_, i) => (
                             <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                           ))}
+                          {isLoading && (
+                            <div className="h-3 w-3 animate-spin rounded-full border border-blue-600 border-t-transparent" />
+                          )}
                         </div>
                       </div>
                     )
@@ -114,6 +190,16 @@ export default function DayTaskList({
                 </div>
               </div>
             ))}
+            
+            {/* Resources Section */}
+            <div className="mt-6">
+              <h4 className="text-sm font-medium text-muted-foreground mb-3">Resources for this day:</h4>
+              <div className="grid grid-cols-1 gap-3">
+                {day.tasks.map((task) => (
+                  <ResourceList key={task.id} taskId={task.id} />
+                ))}
+              </div>
+            </div>
           </div>
         </CardContent>
       )}
