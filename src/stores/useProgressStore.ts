@@ -30,6 +30,7 @@ interface ProgressState {
   }>
   addPendingUpdate: (taskId: string, completed: boolean) => void
   clearPendingUpdates: () => void
+  updateUserProgress: () => void
 }
 
 const DEMO_STORAGE_KEY = 'jlpt-n5-demo-data'

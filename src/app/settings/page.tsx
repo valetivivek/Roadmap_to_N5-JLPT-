@@ -295,7 +295,7 @@ export default function SettingsPage() {
                   Demo Mode
                 </CardTitle>
                 <CardDescription className="text-blue-700">
-                  You're currently in demo mode. Settings are saved locally and will be lost when you clear your browser data.
+                  You&apos;re currently in demo mode. Settings are saved locally and will be lost when you clear your browser data.
                 </CardDescription>
               </CardHeader>
             </Card>

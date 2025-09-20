@@ -26,29 +26,16 @@ export default function AuthPage() {
     setMessage('')
 
     try {
-      if (isSignIn) {
-        const { error } = await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`,
-          },
-        })
-        
-        if (error) throw error
-        
-        setMessage('Check your email for the login link!')
-      } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          options: {
-            emailRedirectTo: `${window.location.origin}/dashboard`,
-          },
-        })
-        
-        if (error) throw error
-        
-        setMessage('Check your email for the confirmation link!')
-      }
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+        },
+      })
+      
+      if (error) throw error
+      
+      setMessage('Check your email for the login link!')
     } catch (error: any) {
       setMessage(error.message)
     } finally {
@@ -70,13 +57,10 @@ export default function AuthPage() {
             <BookOpen className="h-12 w-12 text-blue-600" />
           </div>
           <h2 className="mt-6 text-3xl font-bold text-gray-900">
-            {isSignIn ? 'Sign in to your account' : 'Create your account'}
+            Sign in to your account
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            {isSignIn 
-              ? 'Enter your email to receive a magic link' 
-              : 'Start your JLPT N5 journey today'
-            }
+            Enter your email to receive a magic link
           </p>
         </div>
 
@@ -85,10 +69,7 @@ export default function AuthPage() {
           <CardHeader>
             <CardTitle>Get Started</CardTitle>
             <CardDescription>
-              {isSignIn 
-                ? 'Sign in to sync your progress across devices'
-                : 'Create an account to save your progress'
-              }
+              Sign in to sync your progress across devices
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -120,7 +101,7 @@ export default function AuthPage() {
                 ) : (
                   <>
                     <Mail className="h-4 w-4 mr-2" />
-                    {isSignIn ? 'Send Magic Link' : 'Create Account'}
+                    Send Magic Link
                   </>
                 )}
               </Button>
@@ -140,9 +121,9 @@ export default function AuthPage() {
                 <Button
                   variant="outline"
                   className="w-full"
-                  onClick={() => setIsSignIn(!isSignIn)}
+                  onClick={() => window.location.href = '/'}
                 >
-                  {isSignIn ? 'Need an account? Sign up' : 'Already have an account? Sign in'}
+                  Back to Home
                 </Button>
                 
                 <Button

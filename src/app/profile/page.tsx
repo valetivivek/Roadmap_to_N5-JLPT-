@@ -10,10 +10,10 @@ import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useProgressStore } from '@/stores/useProgressStore'
 import { createClient } from '@/lib/supabase'
-import { User, Download, Upload, Trash2, Save, User as UserIcon } from 'lucide-react'
+import { Download, Upload, Trash2, Save, User as UserIcon } from 'lucide-react'
 
 export default function ProfilePage() {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<any>(null)
   const [displayName, setDisplayName] = useState('')
   const [timezone, setTimezone] = useState('UTC')
   const [isLoading, setIsLoading] = useState(true)
