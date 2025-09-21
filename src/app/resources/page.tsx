@@ -238,20 +238,15 @@ export default function ResourcesPage() {
                                 <Badge className={getTypeColor(resource.type)}>
                                   {resource.type.toUpperCase()}
                                 </Badge>
-                                <Button
-                                  asChild
-                                  className="h-8 px-3 text-sm bg-white border border-gray-200 hover:bg-gray-50"
+                                <a
+                                  href={resource.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-2 h-8 px-4 text-sm bg-blue-600 hover:bg-blue-700 text-white border-0 rounded-md transition-colors"
                                 >
-                                  <a
-                                    href={resource.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-1"
-                                  >
-                                    <ExternalLink className="h-3 w-3" />
-                                    Open
-                                  </a>
-                                </Button>
+                                  <ExternalLink className="h-3 w-3" />
+                                  Open Link
+                                </a>
                               </div>
                             </div>
                           </div>
