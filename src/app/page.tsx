@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { useProgressStore } from '@/stores/useProgressStore'
 import Link from 'next/link'
 import { BookOpen, Target, Calendar, CheckCircle, Circle, ArrowRight, Award, Clock } from 'lucide-react'
+import SupabaseTest from '@/components/SupabaseTest'
 
 // Generate 20 weeks with proper hiragana progression (8 per day)
 const generateWeeks = () => {
@@ -195,6 +196,11 @@ export default function HomePage() {
               <div className="text-sm text-gray-600">Other Tasks</div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Supabase Diagnostic Test */}
+        <div className="mt-8">
+          <SupabaseTest />
         </div>
 
         {/* Demo Mode Notice */}
