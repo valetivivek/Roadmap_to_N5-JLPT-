@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "seed": "tsx scripts/seedRoadmap.ts"
+    "seed": "tsx scripts/seedRoadmap.ts",
+    "seed-jlpt": "tsx scripts/seedJLPTRoadmap.ts",
+    "seed-complete": "tsx scripts/seedCompleteJLPT.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.2",
