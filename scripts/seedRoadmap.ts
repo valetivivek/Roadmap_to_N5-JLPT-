@@ -87,7 +87,11 @@ async function seedRoadmap() {
     // 4. Insert days
     console.log('📆 Inserting roadmap days...')
     
-    const dayEntries = []
+    const dayEntries: Array<{
+      week_id: string;
+      day_number: number;
+      title: string;
+    }> = []
     completeRoadmap.forEach((week, weekIndex) => {
       week.days.forEach((day, dayIndex) => {
         dayEntries.push({
@@ -112,7 +116,12 @@ async function seedRoadmap() {
     // 5. Insert tasks
     console.log('📝 Inserting tasks...')
     
-    const taskEntries = []
+    const taskEntries: Array<{
+      day_id: string;
+      label: string;
+      category: string;
+      points: number;
+    }> = []
     let dayIndex = 0
     
     completeRoadmap.forEach((week, weekIndex) => {
@@ -143,7 +152,10 @@ async function seedRoadmap() {
     // 6. Link tasks to resources
     console.log('🔗 Linking tasks to resources...')
     
-    const taskResourceEntries = []
+    const taskResourceEntries: Array<{
+      task_id: string;
+      resource_id: string;
+    }> = []
     let taskIndex = 0
     
     completeRoadmap.forEach((week) => {
@@ -151,7 +163,7 @@ async function seedRoadmap() {
         day.tasks.forEach(task => {
           if (task.resources) {
             task.resources.forEach(resource => {
-              const resourceData = insertedResources.find(r => r.url === resource.url)
+              const resourceData = insertedResources.find((r: any) => r.url === resource.url)
               if (resourceData) {
                 taskResourceEntries.push({
                   task_id: insertedTasks[taskIndex].id,
