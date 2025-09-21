@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +10,7 @@ import { RoadmapDay, TaskCategory } from '@/types'
 import { getCategoryColor, getCategoryLabel } from '@/lib/utils'
 import { createClient } from '@/lib/supabase'
 import { toast } from 'sonner'
+import { useProgressStore } from '@/stores/useProgressStore'
 
 interface DayTaskListProps {
   day: RoadmapDay
@@ -25,11 +26,17 @@ export default function DayTaskList({
   onTaskToggle 
 }: DayTaskListProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const [localCompletedTasks, setLocalCompletedTasks] = useState(completedTasks)
   const [loadingTasks, setLoadingTasks] = useState<Set<string>>(new Set())
   const supabase = createClient()
   
-  const completedCount = day.tasks.filter(task => localCompletedTasks.has(task.id)).length
+  // Get completed tasks from progress store
+  const { progress, isDemo: storeIsDemo } = useProgressStore()
+  const storeCompletedTasks = new Set(progress.map(p => p.task_id))
+  
+  // Use store data if in demo mode, otherwise use prop
+  const actualCompletedTasks = (isDemo || storeIsDemo) ? storeCompletedTasks : completedTasks
+  
+  const completedCount = day.tasks.filter(task => actualCompletedTasks.has(task.id)).length
   const totalTasks = day.tasks.length
   const progressPercentage = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0
   
@@ -45,26 +52,15 @@ export default function DayTaskList({
   const handleTaskToggle = async (taskId: string, completed: boolean) => {
     console.log('Task toggle:', { taskId, completed, isDemo })
     
-    if (isDemo) {
+    if (isDemo || storeIsDemo) {
       // For demo mode, just call the callback
       if (onTaskToggle) {
-        onTaskToggle(taskId, completed)
+        await onTaskToggle(taskId, completed)
       }
       return
     }
 
     setLoadingTasks(prev => new Set(prev).add(taskId))
-    
-    // Optimistic update
-    setLocalCompletedTasks(prev => {
-      const newSet = new Set(prev)
-      if (completed) {
-        newSet.add(taskId)
-      } else {
-        newSet.delete(taskId)
-      }
-      return newSet
-    })
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -98,8 +94,6 @@ export default function DayTaskList({
         toast.success('Task unchecked!')
       }
     } catch (error: any) {
-      // Revert optimistic update
-      setLocalCompletedTasks(completedTasks)
       toast.error(error.message || 'Failed to update task')
       console.error('Error updating task:', error)
     } finally {
@@ -149,13 +143,13 @@ export default function DayTaskList({
                     {getCategoryLabel(category)}
                   </h4>
                   <Badge variant="secondary" className="text-xs">
-                    {tasks.filter(t => localCompletedTasks.has(t.id)).length}/{tasks.length}
+                    {tasks.filter(t => actualCompletedTasks.has(t.id)).length}/{tasks.length}
                   </Badge>
                 </div>
                 
                 <div className="space-y-2 pl-4">
                   {tasks.map((task) => {
-                    const isCompleted = localCompletedTasks.has(task.id)
+                    const isCompleted = actualCompletedTasks.has(task.id)
                     const isLoading = loadingTasks.has(task.id)
                     return (
                       <div

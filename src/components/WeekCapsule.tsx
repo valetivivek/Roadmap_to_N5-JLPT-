@@ -9,6 +9,7 @@ import { RoadmapWeek, UserProgress } from '@/types'
 import DayTaskList from './DayTaskList'
 import { completeJLPTN5Curriculum } from '@/data/jlptN5Curriculum'
 import { ExternalLink, Globe, Video, FileText, FileDown } from 'lucide-react'
+import { useProgressStore } from '@/stores/useProgressStore'
 
 interface WeekCapsuleProps {
   week: RoadmapWeek
@@ -29,30 +30,21 @@ export default function WeekCapsule({
   const weekData = completeJLPTN5Curriculum.find(w => w.weekNumber === week.order)
   const weekResources = weekData?.resources || []
   
-  // Get completed task IDs for this week
-  const completedTaskIds = new Set<string>()
-  if (isDemo) {
-    // In demo mode, get from localStorage or store
-    const demoData = typeof window !== 'undefined' 
-      ? localStorage.getItem('jlpt-n5-demo-data') 
-      : null
-    if (demoData) {
-      try {
-        const parsed = JSON.parse(demoData)
-        parsed.progress?.forEach((p: any) => {
-          week.days.forEach(day => {
-            day.tasks.forEach(task => {
-              if (task.id === p.task_id) {
-                completedTaskIds.add(task.id)
-              }
-            })
-          })
-        })
-      } catch (error) {
-        console.error('Failed to parse demo data:', error)
-      }
-    }
-  }
+  // Get completed task IDs from progress store
+  const { progress, isDemo: storeIsDemo } = useProgressStore()
+  const allCompletedTaskIds = new Set(progress.map(p => p.task_id))
+  
+  // Filter to only tasks in this week
+  const weekTaskIds = new Set<string>()
+  week.days.forEach(day => {
+    day.tasks.forEach(task => {
+      weekTaskIds.add(task.id)
+    })
+  })
+  
+  const completedTaskIds = new Set(
+    Array.from(allCompletedTaskIds).filter(taskId => weekTaskIds.has(taskId))
+  )
 
   // Calculate week progress
   const totalTasks = week.days.reduce((sum, day) => sum + day.tasks.length, 0)

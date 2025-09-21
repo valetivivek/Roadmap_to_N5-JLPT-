@@ -122,15 +122,22 @@ export default function RoadmapPage() {
     } finally {
       setIsLoading(false)
     }
-  }, [isDemo])
+  }, [])
 
   useEffect(() => {
+    // Set demo mode since we're using generated data instead of Supabase
+    const { setDemoMode } = useProgressStore.getState()
+    setDemoMode(true)
+    
     loadDemoData()
     fetchRoadmapData()
-  }, [loadDemoData, fetchRoadmapData, isDemo])
+  }, [loadDemoData, fetchRoadmapData])
 
-  const handleTaskToggle = (taskId: string, completed: boolean) => {
-    toggleTask(taskId, completed)
+  const handleTaskToggle = async (taskId: string, completed: boolean) => {
+    await toggleTask(taskId, completed)
+    // Save progress to localStorage since we're in demo mode
+    const { saveDemoData } = useProgressStore.getState()
+    saveDemoData()
   }
 
   if (isLoading) {
