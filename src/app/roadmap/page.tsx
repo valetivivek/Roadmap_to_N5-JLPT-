@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useProgressStore } from '@/stores/useProgressStore'
-import { RoadmapWeek } from '@/types'
+import { RoadmapWeek, TaskCategory } from '@/types'
 import { BookOpen, Target, Calendar, Award } from 'lucide-react'
 
 // Generate proper 20-week roadmap with 8 hiragana per day
@@ -65,7 +65,7 @@ const generateRoadmap = (): RoadmapWeek[] => {
           id: `${week}-${day}-${i + 1}`,
           day_id: `${week}-${day}`,
           label: `Learn ${scriptType} ${character} (${romaji})`,
-          category: isHiraganaWeek ? 'hiragana' : 'katakana',
+          category: (isHiraganaWeek ? 'hiragana' : 'katakana') as TaskCategory,
           points: 1,
           created_at: '',
           updated_at: ''
@@ -74,10 +74,10 @@ const generateRoadmap = (): RoadmapWeek[] => {
       
       // 2 additional tasks (vocabulary, grammar, listening, reading)
       const additionalTasks = [
-        { label: 'Practice writing exercises', category: isHiraganaWeek ? 'hiragana' : 'katakana', points: 2 },
-        { label: 'Learn vocabulary words', category: 'vocab', points: 1 },
-        { label: 'Practice pronunciation', category: 'listening', points: 1 },
-        { label: 'Read simple sentences', category: 'reading', points: 1 }
+        { label: 'Practice writing exercises', category: (isHiraganaWeek ? 'hiragana' : 'katakana') as TaskCategory, points: 2 },
+        { label: 'Learn vocabulary words', category: 'vocab' as TaskCategory, points: 1 },
+        { label: 'Practice pronunciation', category: 'listening' as TaskCategory, points: 1 },
+        { label: 'Read simple sentences', category: 'reading' as TaskCategory, points: 1 }
       ]
       
       additionalTasks.forEach((task, index) => {
@@ -85,7 +85,7 @@ const generateRoadmap = (): RoadmapWeek[] => {
           id: `${week}-${day}-${8 + index + 1}`,
           day_id: `${week}-${day}`,
           label: task.label,
-          category: task.category as any,
+          category: task.category,
           points: task.points,
           created_at: '',
           updated_at: ''

@@ -44,7 +44,7 @@ export default function ResourceList({ taskId, className = "" }: ResourceListPro
 
         if (error) throw error
 
-        const resourceList = data?.map(item => item.resources).filter(Boolean) || []
+        const resourceList = data?.flatMap(item => item.resources).filter(Boolean) || []
         setResources(resourceList)
       } catch (err: any) {
         setError(err.message)
