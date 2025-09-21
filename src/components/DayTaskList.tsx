@@ -10,7 +10,6 @@ import { RoadmapDay, TaskCategory } from '@/types'
 import { getCategoryColor, getCategoryLabel } from '@/lib/utils'
 import { createClient } from '@/lib/supabase'
 import { toast } from 'sonner'
-import ResourceList from './ResourceList'
 
 interface DayTaskListProps {
   day: RoadmapDay
@@ -194,15 +193,6 @@ export default function DayTaskList({
               </div>
             ))}
             
-            {/* Resources Section */}
-            <div className="mt-6">
-              <h4 className="text-sm font-medium text-muted-foreground mb-3">Resources for this day:</h4>
-              <div className="grid grid-cols-1 gap-3">
-                {day.tasks.map((task) => (
-                  <ResourceList key={task.id} taskId={task.id} />
-                ))}
-              </div>
-            </div>
           </div>
         </CardContent>
       )}

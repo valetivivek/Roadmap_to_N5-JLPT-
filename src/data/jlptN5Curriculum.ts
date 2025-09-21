@@ -6,11 +6,6 @@ export interface CurriculumTask {
   category: TaskCategory
   points: number
   description?: string
-  resources?: Array<{
-    title: string
-    url: string
-    type: 'video' | 'site' | 'pdf' | 'audio'
-  }>
 }
 
 export interface CurriculumDay {
@@ -27,6 +22,12 @@ export interface CurriculumWeek {
   description: string
   focus: string[]
   days: CurriculumDay[]
+  resources?: Array<{
+    title: string
+    url: string
+    type: 'video' | 'site' | 'pdf' | 'audio'
+    description?: string
+  }>
 }
 
 // Comprehensive 20-week JLPT N5 curriculum
@@ -38,6 +39,20 @@ export const jlptN5Curriculum: CurriculumWeek[] = [
     title: 'Hiragana Foundation',
     description: 'Master the hiragana syllabary with proper stroke order and pronunciation',
     focus: ['hiragana', 'pronunciation', 'writing'],
+    resources: [
+      {
+        title: 'Tofugu Hiragana Guide',
+        url: 'https://www.tofugu.com/japanese/learn-hiragana/',
+        type: 'site',
+        description: 'Complete hiragana learning guide with mnemonics and stroke order'
+      },
+      {
+        title: 'Hiragana Writing Practice Sheets',
+        url: 'https://www.tofugu.com/japanese/learn-hiragana/',
+        type: 'pdf',
+        description: 'Downloadable practice sheets for all hiragana characters'
+      }
+    ],
     days: [
       {
         id: 'week-1-day-1',
@@ -49,11 +64,7 @@ export const jlptN5Curriculum: CurriculumWeek[] = [
             label: 'Learn hiragana あ-お (a, i, u, e, o)',
             category: 'hiragana',
             points: 3,
-            description: 'Master the five basic vowel characters with proper pronunciation',
-            resources: [
-              { title: 'Tofugu Hiragana Guide', url: 'https://www.tofugu.com/japanese/learn-hiragana/', type: 'site' },
-              { title: 'Hiragana Pronunciation', url: 'https://www.youtube.com/watch?v=6p9Il_j0zjc', type: 'video' }
-            ]
+            description: 'Master the five basic vowel characters with proper pronunciation'
           },
           {
             id: 'practice-vowels',
@@ -248,6 +259,14 @@ export const jlptN5Curriculum: CurriculumWeek[] = [
     title: 'Hiragana Completion',
     description: 'Complete the hiragana syllabary and begin basic vocabulary',
     focus: ['hiragana', 'vocab', 'reading'],
+    resources: [
+      {
+        title: 'Hiragana Recognition Practice',
+        url: 'https://realkana.com/hiragana/',
+        type: 'site',
+        description: 'Interactive hiragana recognition practice'
+      }
+    ],
     days: [
       {
         id: 'week-2-day-1',
@@ -454,6 +473,14 @@ export const jlptN5Curriculum: CurriculumWeek[] = [
     title: 'Katakana Foundation',
     description: 'Begin learning katakana characters and foreign loan words',
     focus: ['katakana', 'vocab', 'reading'],
+    resources: [
+      {
+        title: 'Tofugu Katakana Guide',
+        url: 'https://www.tofugu.com/japanese/learn-katakana/',
+        type: 'site',
+        description: 'Complete katakana learning guide with memory tricks'
+      }
+    ],
     days: [
       {
         id: 'week-3-day-1',
@@ -660,6 +687,14 @@ export const jlptN5Curriculum: CurriculumWeek[] = [
     title: 'Katakana Completion',
     description: 'Complete katakana learning and begin basic grammar',
     focus: ['katakana', 'grammar', 'vocab'],
+    resources: [
+      {
+        title: 'Katakana Recognition Practice',
+        url: 'https://realkana.com/katakana/',
+        type: 'site',
+        description: 'Interactive katakana recognition practice'
+      }
+    ],
     days: [
       {
         id: 'week-4-day-1',
@@ -866,6 +901,20 @@ export const jlptN5Curriculum: CurriculumWeek[] = [
     title: 'Basic Grammar - Particles',
     description: 'Learn essential Japanese particles and sentence structure',
     focus: ['grammar', 'vocab', 'reading'],
+    resources: [
+      {
+        title: 'Tae Kim\'s Grammar Guide - Particles',
+        url: 'https://guidetojapanese.org/learn/grammar',
+        type: 'site',
+        description: 'Comprehensive guide to Japanese particles and grammar'
+      },
+      {
+        title: 'JLPT N5 Grammar List',
+        url: 'https://jlptsensei.com/jlpt-n5-grammar-list/',
+        type: 'site',
+        description: 'Complete N5 grammar patterns with examples'
+      }
+    ],
     days: [
       {
         id: 'week-5-day-1',
