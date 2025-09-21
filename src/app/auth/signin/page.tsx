@@ -33,14 +33,6 @@ export default function SignInPage() {
     setMessage('')
 
     try {
-      // Debug: Log environment variables
-      console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
-      console.log('Supabase Key:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-      
-      // Test connection first
-      const { data: testData, error: testError } = await supabase.from('profiles').select('count').limit(1)
-      console.log('Test connection:', { testData, testError })
-      
       const { error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
@@ -50,7 +42,6 @@ export default function SignInPage() {
 
       router.push('/dashboard')
     } catch (error: any) {
-      console.error('Sign in error:', error)
       setMessage(error.message)
     } finally {
       setIsLoading(false)

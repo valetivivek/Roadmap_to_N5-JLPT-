@@ -23,12 +23,6 @@ export default function WeekCapsule({
 }: WeekCapsuleProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   
-  // Calculate week progress
-  const weekProgress = userProgress?.weeklyProgress.find(w => w.week === week.order)
-  const completedTasks = weekProgress?.completed || 0
-  const totalTasks = weekProgress?.total || week.days.reduce((sum, day) => sum + day.tasks.length, 0)
-  const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
-  
   // Get completed task IDs for this week
   const completedTaskIds = new Set<string>()
   if (isDemo) {
@@ -54,8 +48,14 @@ export default function WeekCapsule({
     }
   }
 
+  // Calculate week progress
+  const totalTasks = week.days.reduce((sum, day) => sum + day.tasks.length, 0)
+  const completedTasks = completedTaskIds.size
+  const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
+  const isWeekCompleted = progressPercentage === 100
+
   const getWeekStatus = () => {
-    if (progressPercentage === 100) return 'completed'
+    if (isWeekCompleted) return 'completed'
     if (progressPercentage > 0) return 'in-progress'
     return 'not-started'
   }
@@ -80,6 +80,11 @@ export default function WeekCapsule({
             <Badge variant="secondary" className="ml-2">
               Week {week.order}
             </Badge>
+            {isWeekCompleted && (
+              <Badge className="bg-green-100 text-green-800">
+                ✓ Completed
+              </Badge>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <div className="text-right">

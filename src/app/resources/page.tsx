@@ -1,479 +1,417 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
-  ExternalLink, 
-  Video, 
-  Globe, 
-  FileText, 
   BookOpen, 
-  Search,
-  Filter,
-  Calendar,
-  Target,
-  ChevronDown,
-  ChevronRight
+  Download, 
+  ExternalLink, 
+  Search, 
+  FileText,
+  Award,
+  Video,
+  Globe,
+  FileDown
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase'
 
-interface Resource {
+interface GlobalResource {
   id: string
   title: string
+  description: string
   url: string
-  kind: 'video' | 'site' | 'deck' | 'doc'
-  description?: string
+  type: 'reference' | 'practice' | 'test' | 'guide'
+  category: 'hiragana' | 'katakana' | 'vocabulary' | 'grammar' | 'listening' | 'reading' | 'general'
+  difficulty: 'beginner' | 'intermediate' | 'advanced'
+  format: 'pdf' | 'video' | 'website' | 'app' | 'audio'
 }
 
-interface TaskResource {
-  task_id: string
-  resource_id: string
-  resources: Resource
-  tasks: {
-    id: string
-    label: string
-    category: string
-    points: number
-    day_id: string
-    roadmap_days: {
-      id: string
-      day_number: number
-      title: string
-      week_id: string
-      roadmap_weeks: {
-        id: string
-        title: string
-        order: number
-      }
-    }
+const globalResources: GlobalResource[] = [
+  // Hiragana Resources
+  {
+    id: 'hiragana-chart',
+    title: 'Complete Hiragana Chart',
+    description: 'Printable hiragana chart with stroke order and pronunciation',
+    url: '#',
+    type: 'reference',
+    category: 'hiragana',
+    difficulty: 'beginner',
+    format: 'pdf'
+  },
+  {
+    id: 'hiragana-practice',
+    title: 'Hiragana Writing Practice Sheets',
+    description: 'Downloadable practice sheets for all hiragana characters',
+    url: '#',
+    type: 'practice',
+    category: 'hiragana',
+    difficulty: 'beginner',
+    format: 'pdf'
+  },
+  {
+    id: 'hiragana-quiz',
+    title: 'Hiragana Recognition Quiz',
+    description: 'Interactive quiz to test hiragana recognition skills',
+    url: '#',
+    type: 'test',
+    category: 'hiragana',
+    difficulty: 'beginner',
+    format: 'website'
+  },
+
+  // Katakana Resources
+  {
+    id: 'katakana-chart',
+    title: 'Complete Katakana Chart',
+    description: 'Printable katakana chart with stroke order and pronunciation',
+    url: '#',
+    type: 'reference',
+    category: 'katakana',
+    difficulty: 'beginner',
+    format: 'pdf'
+  },
+  {
+    id: 'katakana-practice',
+    title: 'Katakana Writing Practice Sheets',
+    description: 'Downloadable practice sheets for all katakana characters',
+    url: '#',
+    type: 'practice',
+    category: 'katakana',
+    difficulty: 'beginner',
+    format: 'pdf'
+  },
+
+  // Vocabulary Resources
+  {
+    id: 'n5-vocab-list',
+    title: 'JLPT N5 Vocabulary List',
+    description: 'Complete list of 800+ N5 vocabulary words with meanings',
+    url: '#',
+    type: 'reference',
+    category: 'vocabulary',
+    difficulty: 'beginner',
+    format: 'pdf'
+  },
+  {
+    id: 'vocab-flashcards',
+    title: 'N5 Vocabulary Flashcards',
+    description: 'Digital flashcards for N5 vocabulary practice',
+    url: '#',
+    type: 'practice',
+    category: 'vocabulary',
+    difficulty: 'beginner',
+    format: 'app'
+  },
+
+  // Grammar Resources
+  {
+    id: 'n5-grammar-guide',
+    title: 'N5 Grammar Guide',
+    description: 'Complete grammar reference for JLPT N5 level',
+    url: '#',
+    type: 'guide',
+    category: 'grammar',
+    difficulty: 'beginner',
+    format: 'pdf'
+  },
+  {
+    id: 'grammar-exercises',
+    title: 'Grammar Practice Exercises',
+    description: 'Interactive exercises for N5 grammar patterns',
+    url: '#',
+    type: 'practice',
+    category: 'grammar',
+    difficulty: 'beginner',
+    format: 'website'
+  },
+
+  // Listening Resources
+  {
+    id: 'n5-listening-practice',
+    title: 'N5 Listening Practice',
+    description: 'Audio exercises for JLPT N5 listening comprehension',
+    url: '#',
+    type: 'practice',
+    category: 'listening',
+    difficulty: 'beginner',
+    format: 'audio'
+  },
+
+  // Reading Resources
+  {
+    id: 'n5-reading-practice',
+    title: 'N5 Reading Comprehension',
+    description: 'Practice texts and exercises for N5 reading',
+    url: '#',
+    type: 'practice',
+    category: 'reading',
+    difficulty: 'beginner',
+    format: 'pdf'
+  },
+
+  // Mock Tests
+  {
+    id: 'n5-mock-test-1',
+    title: 'JLPT N5 Mock Test #1',
+    description: 'Full-length practice test for JLPT N5',
+    url: '#',
+    type: 'test',
+    category: 'general',
+    difficulty: 'beginner',
+    format: 'pdf'
+  },
+  {
+    id: 'n5-mock-test-2',
+    title: 'JLPT N5 Mock Test #2',
+    description: 'Second full-length practice test for JLPT N5',
+    url: '#',
+    type: 'test',
+    category: 'general',
+    difficulty: 'beginner',
+    format: 'pdf'
+  },
+
+  // General Resources
+  {
+    id: 'jlpt-guide',
+    title: 'Complete JLPT N5 Guide',
+    description: 'Everything you need to know about the JLPT N5 exam',
+    url: '#',
+    type: 'guide',
+    category: 'general',
+    difficulty: 'beginner',
+    format: 'pdf'
+  },
+  {
+    id: 'study-schedule',
+    title: '20-Week Study Schedule',
+    description: 'Detailed study schedule for N5 preparation',
+    url: '#',
+    type: 'guide',
+    category: 'general',
+    difficulty: 'beginner',
+    format: 'pdf'
+  }
+]
+
+const getTypeIcon = (type: string) => {
+  switch (type) {
+    case 'reference': return <FileText className="h-4 w-4" />
+    case 'practice': return <BookOpen className="h-4 w-4" />
+    case 'test': return <Award className="h-4 w-4" />
+    case 'guide': return <FileText className="h-4 w-4" />
+    default: return <FileText className="h-4 w-4" />
+  }
+}
+
+const getFormatIcon = (format: string) => {
+  switch (format) {
+    case 'pdf': return <FileDown className="h-4 w-4" />
+    case 'video': return <Video className="h-4 w-4" />
+    case 'website': return <Globe className="h-4 w-4" />
+    case 'app': return <BookOpen className="h-4 w-4" />
+    case 'audio': return <BookOpen className="h-4 w-4" />
+    default: return <FileText className="h-4 w-4" />
+  }
+}
+
+const getDifficultyColor = (difficulty: string) => {
+  switch (difficulty) {
+    case 'beginner': return 'bg-green-100 text-green-800'
+    case 'intermediate': return 'bg-yellow-100 text-yellow-800'
+    case 'advanced': return 'bg-red-100 text-red-800'
+    default: return 'bg-gray-100 text-gray-800'
   }
 }
 
 export default function ResourcesPage() {
-  const [resources, setResources] = useState<TaskResource[]>([])
-  const [filteredResources, setFilteredResources] = useState<TaskResource[]>([])
-  const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedKind, setSelectedKind] = useState<string>('all')
-  const [selectedWeek, setSelectedWeek] = useState<number | null>(null)
-  const [expandedWeeks, setExpandedWeeks] = useState<Set<number>>(new Set())
-  const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set())
-  const supabase = createClient()
+  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [selectedType, setSelectedType] = useState('all')
 
-  useEffect(() => {
-    const fetchResources = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('task_resources')
-          .select(`
-            task_id,
-            resource_id,
-            resources (
-              id,
-              title,
-              url,
-              kind,
-              description
-            ),
-            tasks (
-              id,
-              label,
-              category,
-              points,
-              day_id,
-              roadmap_days (
-                id,
-                day_number,
-                title,
-                week_id,
-                roadmap_weeks (
-                  id,
-                  title,
-                  order
-                )
-              )
-            )
-          `)
-          .order('roadmap_weeks.order', { referencedTable: 'tasks.roadmap_days.roadmap_weeks' })
-          .order('day_number', { referencedTable: 'tasks.roadmap_days' })
+  const filteredResources = globalResources.filter(resource => {
+    const matchesSearch = resource.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         resource.description.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesCategory = selectedCategory === 'all' || resource.category === selectedCategory
+    const matchesType = selectedType === 'all' || resource.type === selectedType
 
-        if (error) throw error
+    return matchesSearch && matchesCategory && matchesType
+  })
 
-        setResources(data || [])
-        setFilteredResources(data || [])
-      } catch (error) {
-        console.error('Error fetching resources:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+  const categories = [
+    { value: 'all', label: 'All Categories' },
+    { value: 'hiragana', label: 'Hiragana' },
+    { value: 'katakana', label: 'Katakana' },
+    { value: 'vocabulary', label: 'Vocabulary' },
+    { value: 'grammar', label: 'Grammar' },
+    { value: 'listening', label: 'Listening' },
+    { value: 'reading', label: 'Reading' },
+    { value: 'general', label: 'General' }
+  ]
 
-    fetchResources()
-  }, [supabase])
-
-  useEffect(() => {
-    let filtered = resources
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(item => 
-        item.resources.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.resources.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.tasks.label.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    }
-
-    // Filter by resource kind
-    if (selectedKind !== 'all') {
-      filtered = filtered.filter(item => item.resources.kind === selectedKind)
-    }
-
-    // Filter by week
-    if (selectedWeek !== null) {
-      filtered = filtered.filter(item => item.tasks.roadmap_days.roadmap_weeks.order === selectedWeek)
-    }
-
-    setFilteredResources(filtered)
-  }, [resources, searchTerm, selectedKind, selectedWeek])
-
-  const getResourceIcon = (kind: string) => {
-    switch (kind) {
-      case 'video':
-        return <Video className="h-4 w-4" />
-      case 'site':
-        return <Globe className="h-4 w-4" />
-      case 'deck':
-        return <BookOpen className="h-4 w-4" />
-      case 'doc':
-        return <FileText className="h-4 w-4" />
-      default:
-        return <ExternalLink className="h-4 w-4" />
-    }
-  }
-
-  const getResourceColor = (kind: string) => {
-    switch (kind) {
-      case 'video':
-        return 'bg-red-100 text-red-800 border-red-200'
-      case 'site':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'deck':
-        return 'bg-green-100 text-green-800 border-green-200'
-      case 'doc':
-        return 'bg-purple-100 text-purple-800 border-purple-200'
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
-    }
-  }
-
-  const getResourceLabel = (kind: string) => {
-    switch (kind) {
-      case 'video':
-        return 'Video'
-      case 'site':
-        return 'Website'
-      case 'deck':
-        return 'Flashcards'
-      case 'doc':
-        return 'Document'
-      default:
-        return 'Resource'
-    }
-  }
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'hiragana':
-        return 'bg-blue-100 text-blue-800'
-      case 'katakana':
-        return 'bg-green-100 text-green-800'
-      case 'vocab':
-        return 'bg-purple-100 text-purple-800'
-      case 'grammar':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'listening':
-        return 'bg-pink-100 text-pink-800'
-      case 'reading':
-        return 'bg-indigo-100 text-indigo-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  // Group resources by week and day
-  const groupedResources = filteredResources.reduce((acc, item) => {
-    const weekNum = item.tasks.roadmap_days.roadmap_weeks.order
-    const dayId = item.tasks.day_id
-    const dayTitle = item.tasks.roadmap_days.title
-
-    if (!acc[weekNum]) {
-      acc[weekNum] = {
-        weekInfo: item.tasks.roadmap_days.roadmap_weeks,
-        days: {}
-      }
-    }
-
-    if (!acc[weekNum].days[dayId]) {
-      acc[weekNum].days[dayId] = {
-        dayInfo: item.tasks.roadmap_days,
-        resources: []
-      }
-    }
-
-    acc[weekNum].days[dayId].resources.push(item)
-    return acc
-  }, {} as Record<number, any>)
-
-  const toggleWeek = (weekNum: number) => {
-    const newExpanded = new Set(expandedWeeks)
-    if (newExpanded.has(weekNum)) {
-      newExpanded.delete(weekNum)
-    } else {
-      newExpanded.add(weekNum)
-    }
-    setExpandedWeeks(newExpanded)
-  }
-
-  const toggleDay = (dayId: string) => {
-    const newExpanded = new Set(expandedDays)
-    if (newExpanded.has(dayId)) {
-      newExpanded.delete(dayId)
-    } else {
-      newExpanded.add(dayId)
-    }
-    setExpandedDays(newExpanded)
-  }
-
-  const getUniqueWeeks = () => {
-    const weeks = [...new Set(resources.map(item => item.tasks.roadmap_days.roadmap_weeks.order))].sort((a, b) => a - b)
-    return weeks
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center min-h-96">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading resources...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  const types = [
+    { value: 'all', label: 'All Types' },
+    { value: 'reference', label: 'Reference' },
+    { value: 'practice', label: 'Practice' },
+    { value: 'test', label: 'Tests' },
+    { value: 'guide', label: 'Guides' }
+  ]
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Learning Resources</h1>
-              <p className="text-gray-600 mt-2">
-                Curated learning materials organized by week and day
-              </p>
-            </div>
-          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Global Resources</h1>
+          <p className="text-xl text-gray-600">
+            Comprehensive learning materials for your JLPT N5 journey
+          </p>
         </div>
 
-        {/* Filters */}
+        {/* Search and Filters */}
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="text-lg">Filter Resources</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="h-5 w-5" />
+              Find Resources
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Search resources, tasks, or descriptions..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="lg:col-span-2">
+                <Input
+                  placeholder="Search resources..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full"
+                />
               </div>
-              
-              <div className="flex gap-2 flex-wrap">
-                <select
-                  value={selectedKind}
-                  onChange={(e) => setSelectedKind(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                >
-                  <option value="all">All Types</option>
-                  <option value="video">Videos</option>
-                  <option value="site">Websites</option>
-                  <option value="deck">Flashcards</option>
-                  <option value="doc">Documents</option>
-                </select>
-                
-                <select
-                  value={selectedWeek || ''}
-                  onChange={(e) => setSelectedWeek(e.target.value ? Number(e.target.value) : null)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                >
-                  <option value="">All Weeks</option>
-                  {getUniqueWeeks().map(weekNum => (
-                    <option key={weekNum} value={weekNum}>Week {weekNum}</option>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category.value} value={category.value}>
+                      {category.label}
+                    </SelectItem>
                   ))}
-                </select>
-              </div>
+                </SelectContent>
+              </Select>
+              <Select value={selectedType} onValueChange={setSelectedType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {types.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>
 
-        {/* Resources by Week */}
-        <div className="space-y-6">
-          {Object.entries(groupedResources).map(([weekNum, weekData]) => {
-            const weekNumber = Number(weekNum)
-            const isExpanded = expandedWeeks.has(weekNumber)
-            
-            return (
-              <Card key={weekNumber} className="overflow-hidden">
-                <CardHeader 
-                  className="cursor-pointer"
-                  onClick={() => toggleWeek(weekNumber)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {isExpanded ? (
-                        <ChevronDown className="h-5 w-5" />
-                      ) : (
-                        <ChevronRight className="h-5 w-5" />
-                      )}
-                      <CardTitle className="text-xl">
-                        {weekData.weekInfo.title}
-                      </CardTitle>
-                      <Badge variant="outline">
-                        {Object.keys(weekData.days).length} days
-                      </Badge>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {Object.values(weekData.days).reduce((sum: number, day: any) => sum + day.resources.length, 0)} resources
-                    </div>
+        {/* Resource Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredResources.map((resource) => (
+            <Card key={resource.id} className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-2">
+                    {getTypeIcon(resource.type)}
+                    <CardTitle className="text-lg">{resource.title}</CardTitle>
                   </div>
-                </CardHeader>
-
-                {isExpanded && (
-                  <CardContent className="pt-0">
-                    <div className="space-y-4">
-                      {Object.entries(weekData.days).map(([dayId, dayData]: [string, any]) => {
-                        const isDayExpanded = expandedDays.has(dayId)
-                        
-                        return (
-                          <Card key={dayId} className="border-l-4 border-l-blue-500">
-                            <CardHeader 
-                              className="cursor-pointer pb-3"
-                              onClick={() => toggleDay(dayId)}
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  {isDayExpanded ? (
-                                    <ChevronDown className="h-4 w-4" />
-                                  ) : (
-                                    <ChevronRight className="h-4 w-4" />
-                                  )}
-                                  <h4 className="font-medium">{dayData.dayInfo.title}</h4>
-                                  <Badge variant="secondary" className="text-xs">
-                                    {dayData.resources.length} resources
-                                  </Badge>
-                                </div>
-                              </div>
-                            </CardHeader>
-
-                            {isDayExpanded && (
-                              <CardContent className="pt-0">
-                                <div className="space-y-4">
-                                  {dayData.resources.map((item: TaskResource) => (
-                                    <div key={`${item.task_id}-${item.resource_id}`} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-                                      <div className="flex items-start gap-3">
-                                        <div className="flex-shrink-0 mt-1">
-                                          {getResourceIcon(item.resources.kind)}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                          <div className="flex items-center gap-2 mb-2">
-                                            <h5 className="font-medium text-sm">{item.resources.title}</h5>
-                                            <Badge variant="outline" className={`text-xs ${getResourceColor(item.resources.kind)}`}>
-                                              {getResourceLabel(item.resources.kind)}
-                                            </Badge>
-                                            <Badge variant="outline" className={`text-xs ${getCategoryColor(item.tasks.category)}`}>
-                                              {item.tasks.category}
-                                            </Badge>
-                                          </div>
-                                          
-                                          {item.resources.description && (
-                                            <p className="text-sm text-muted-foreground mb-2">
-                                              {item.resources.description}
-                                            </p>
-                                          )}
-                                          
-                                          <div className="flex items-center gap-2 mb-3">
-                                            <span className="text-xs text-muted-foreground">
-                                              For task: {item.tasks.label}
-                                            </span>
-                                            <div className="flex gap-1">
-                                              {Array.from({ length: item.tasks.points }, (_, i) => (
-                                                <div key={i} className="w-2 h-2 bg-yellow-400 rounded-full" />
-                                              ))}
-                                            </div>
-                                          </div>
-                                          
-                                          <Button
-                                            asChild
-                                            variant="outline"
-                                            size="sm"
-                                            className="h-8 text-xs"
-                                          >
-                                            <a
-                                              href={item.resources.url}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="flex items-center gap-1"
-                                            >
-                                              <ExternalLink className="h-3 w-3" />
-                                              Open Resource
-                                            </a>
-                                          </Button>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </CardContent>
-                            )}
-                          </Card>
-                        )
-                      })}
-                    </div>
-                  </CardContent>
-                )}
-              </Card>
-            )
-          })}
+                  <div className="flex items-center gap-1">
+                    {getFormatIcon(resource.format)}
+                  </div>
+                </div>
+                <CardDescription>{resource.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <Badge variant="outline" className="capitalize">
+                    {resource.category}
+                  </Badge>
+                  <Badge className={`capitalize ${getDifficultyColor(resource.difficulty)}`}>
+                    {resource.difficulty}
+                  </Badge>
+                  <Badge variant="secondary" className="capitalize">
+                    {resource.type}
+                  </Badge>
+                </div>
+                <div className="flex gap-2">
+                  <Button asChild className="flex-1">
+                    <a href={resource.url} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      Open
+                    </a>
+                  </Button>
+                  {resource.format === 'pdf' && (
+                    <Button variant="outline" size="sm">
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {filteredResources.length === 0 && (
-          <Card>
-            <CardContent className="flex items-center justify-center py-12">
-              <div className="text-center">
-                <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-600 mb-2">
-                  No resources found
-                </h3>
-                <p className="text-gray-500">
-                  Try adjusting your search terms or filters
-                </p>
-              </div>
+          <Card className="text-center py-12">
+            <CardContent>
+              <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-600 mb-2">
+                No resources found
+              </h3>
+              <p className="text-gray-500">
+                Try adjusting your search criteria or filters
+              </p>
             </CardContent>
           </Card>
         )}
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
+          <Card className="text-center">
+            <CardContent className="p-6">
+              <div className="text-2xl font-bold text-blue-600 mb-1">
+                {globalResources.length}
+              </div>
+              <div className="text-sm text-gray-600">Total Resources</div>
+            </CardContent>
+          </Card>
+          <Card className="text-center">
+            <CardContent className="p-6">
+              <div className="text-2xl font-bold text-green-600 mb-1">
+                {globalResources.filter(r => r.type === 'practice').length}
+              </div>
+              <div className="text-sm text-gray-600">Practice Materials</div>
+            </CardContent>
+          </Card>
+          <Card className="text-center">
+            <CardContent className="p-6">
+              <div className="text-2xl font-bold text-purple-600 mb-1">
+                {globalResources.filter(r => r.type === 'test').length}
+              </div>
+              <div className="text-sm text-gray-600">Mock Tests</div>
+            </CardContent>
+          </Card>
+          <Card className="text-center">
+            <CardContent className="p-6">
+              <div className="text-2xl font-bold text-orange-600 mb-1">
+                {globalResources.filter(r => r.format === 'pdf').length}
+              </div>
+              <div className="text-sm text-gray-600">PDF Downloads</div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   )

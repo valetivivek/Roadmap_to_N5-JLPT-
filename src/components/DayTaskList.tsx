@@ -44,6 +44,8 @@ export default function DayTaskList({
   }, {} as Record<TaskCategory, typeof day.tasks>)
 
   const handleTaskToggle = async (taskId: string, completed: boolean) => {
+    console.log('Task toggle:', { taskId, completed, isDemo })
+    
     if (isDemo) {
       // For demo mode, just call the callback
       if (onTaskToggle) {
@@ -164,9 +166,10 @@ export default function DayTaskList({
                         <Checkbox
                           id={`task-${task.id}`}
                           checked={isCompleted}
-                          onCheckedChange={(checked) => 
-                            handleTaskToggle(task.id, checked as boolean)
-                          }
+                          onCheckedChange={(checked) => {
+                            const isChecked = checked === true
+                            handleTaskToggle(task.id, isChecked)
+                          }}
                           disabled={isLoading || (!onTaskToggle && !isDemo)}
                           className="pointer-events-auto"
                         />

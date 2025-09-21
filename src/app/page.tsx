@@ -1,277 +1,221 @@
 'use client'
 
-import { useEffect } from 'react'
-import Hero from '@/components/Hero'
-import WeekCapsule from '@/components/WeekCapsule'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useProgressStore } from '@/stores/useProgressStore'
-import { RoadmapWeek } from '@/types'
 import Link from 'next/link'
-import { BookOpen, Target, Clock, Users } from 'lucide-react'
+import { BookOpen, Target, Calendar, CheckCircle, Circle, ArrowRight, Award, Clock } from 'lucide-react'
 
-// Mock data for demo purposes
-const mockWeeks: RoadmapWeek[] = [
-  {
-    id: '1',
-    title: 'Week 1: Hiragana Basics (a-o)',
-    order: 1,
-    days: [
-      {
-        id: '1-1',
-        week_id: '1',
-        day_number: 1,
-        title: 'Day 1: Hiragana あ-お',
-        tasks: [
-          { id: '1-1-1', day_id: '1-1', label: 'Learn hiragana あ (a)', category: 'hiragana', points: 1, created_at: '', updated_at: '' },
-          { id: '1-1-2', day_id: '1-1', label: 'Learn hiragana い (i)', category: 'hiragana', points: 1, created_at: '', updated_at: '' },
-          { id: '1-1-3', day_id: '1-1', label: 'Learn hiragana う (u)', category: 'hiragana', points: 1, created_at: '', updated_at: '' },
-          { id: '1-1-4', day_id: '1-1', label: 'Learn hiragana え (e)', category: 'hiragana', points: 1, created_at: '', updated_at: '' },
-          { id: '1-1-5', day_id: '1-1', label: 'Learn hiragana お (o)', category: 'hiragana', points: 1, created_at: '', updated_at: '' },
-          { id: '1-1-6', day_id: '1-1', label: 'Practice writing あ-お', category: 'hiragana', points: 2, created_at: '', updated_at: '' },
-          { id: '1-1-7', day_id: '1-1', label: 'Learn basic greetings', category: 'vocab', points: 1, created_at: '', updated_at: '' },
-          { id: '1-1-8', day_id: '1-1', label: 'Learn numbers 1-10', category: 'vocab', points: 1, created_at: '', updated_at: '' },
-          { id: '1-1-9', day_id: '1-1', label: 'Practice pronunciation', category: 'listening', points: 1, created_at: '', updated_at: '' },
-          { id: '1-1-10', day_id: '1-1', label: 'Read simple sentences', category: 'reading', points: 1, created_at: '', updated_at: '' },
-        ],
-        created_at: '',
-        updated_at: ''
-      },
-      {
-        id: '1-2',
-        week_id: '1',
-        day_number: 2,
-        title: 'Day 2: Hiragana か-こ',
-        tasks: [
-          { id: '1-2-1', day_id: '1-2', label: 'Learn hiragana か (ka)', category: 'hiragana', points: 1, created_at: '', updated_at: '' },
-          { id: '1-2-2', day_id: '1-2', label: 'Learn hiragana き (ki)', category: 'hiragana', points: 1, created_at: '', updated_at: '' },
-          { id: '1-2-3', day_id: '1-2', label: 'Learn hiragana く (ku)', category: 'hiragana', points: 1, created_at: '', updated_at: '' },
-          { id: '1-2-4', day_id: '1-2', label: 'Learn hiragana け (ke)', category: 'hiragana', points: 1, created_at: '', updated_at: '' },
-          { id: '1-2-5', day_id: '1-2', label: 'Learn hiragana こ (ko)', category: 'hiragana', points: 1, created_at: '', updated_at: '' },
-          { id: '1-2-6', day_id: '1-2', label: 'Practice writing か-こ', category: 'hiragana', points: 2, created_at: '', updated_at: '' },
-          { id: '1-2-7', day_id: '1-2', label: 'Learn family terms', category: 'vocab', points: 1, created_at: '', updated_at: '' },
-          { id: '1-2-8', day_id: '1-2', label: 'Learn numbers 11-20', category: 'vocab', points: 1, created_at: '', updated_at: '' },
-          { id: '1-2-9', day_id: '1-2', label: 'Practice listening exercises', category: 'listening', points: 1, created_at: '', updated_at: '' },
-          { id: '1-2-10', day_id: '1-2', label: 'Read basic phrases', category: 'reading', points: 1, created_at: '', updated_at: '' },
-        ],
-        created_at: '',
-        updated_at: ''
-      }
-    ],
-    created_at: '',
-    updated_at: ''
-  },
-  {
-    id: '2',
-    title: 'Week 2: Hiragana (ka-ko)',
-    order: 2,
-    days: [
-      {
-        id: '2-1',
-        week_id: '2',
-        day_number: 1,
-        title: 'Day 1: Hiragana さ-そ',
-        tasks: [
-          { id: '2-1-1', day_id: '2-1', label: 'Learn hiragana さ (sa)', category: 'hiragana', points: 1, created_at: '', updated_at: '' },
-          { id: '2-1-2', day_id: '2-1', label: 'Learn hiragana し (shi)', category: 'hiragana', points: 1, created_at: '', updated_at: '' },
-          { id: '2-1-3', day_id: '2-1', label: 'Learn hiragana す (su)', category: 'hiragana', points: 1, created_at: '', updated_at: '' },
-          { id: '2-1-4', day_id: '2-1', label: 'Learn hiragana せ (se)', category: 'hiragana', points: 1, created_at: '', updated_at: '' },
-          { id: '2-1-5', day_id: '2-1', label: 'Learn hiragana そ (so)', category: 'hiragana', points: 1, created_at: '', updated_at: '' },
-          { id: '2-1-6', day_id: '2-1', label: 'Practice writing さ-そ', category: 'hiragana', points: 2, created_at: '', updated_at: '' },
-          { id: '2-1-7', day_id: '2-1', label: 'Learn colors', category: 'vocab', points: 1, created_at: '', updated_at: '' },
-          { id: '2-1-8', day_id: '2-1', label: 'Learn basic verbs', category: 'vocab', points: 1, created_at: '', updated_at: '' },
-          { id: '2-1-9', day_id: '2-1', label: 'Practice listening', category: 'listening', points: 1, created_at: '', updated_at: '' },
-          { id: '2-1-10', day_id: '2-1', label: 'Read simple texts', category: 'reading', points: 1, created_at: '', updated_at: '' },
-        ],
-        created_at: '',
-        updated_at: ''
-      }
-    ],
-    created_at: '',
-    updated_at: ''
+// Generate 20 weeks with proper hiragana progression (8 per day)
+const generateWeeks = () => {
+  const weeks = []
+  const hiraganaGroups = [
+    ['あ-お', 'か-こ', 'さ-そ', 'た-と', 'な-の', 'は-ほ', 'ま-も'],
+    ['や-よ', 'ら-ろ', 'わ-ん', 'が-ご', 'ざ-ぞ', 'だ-ど', 'ば-ぼ'],
+    ['ぱ-ぽ', 'きゃ-きょ', 'しゃ-しょ', 'ちゃ-ちょ', 'にゃ-にょ', 'ひゃ-ひょ', 'みゃ-みょ'],
+    ['りゃ-りょ', 'ぎゃ-ぎょ', 'じゃ-じょ', 'びゃ-びょ', 'ぴゃ-ぴょ', 'く-く', 'ぐ-ぐ'],
+    ['す-す', 'ず-ず', 'つ-つ', 'づ-づ', 'ぬ-ぬ', 'ふ-ふ', 'ぶ-ぶ'],
+    ['ぷ-ぷ', 'む-む', 'ゆ-ゆ', 'よ-よ', 'る-る', 'わ-わ', 'を-を'],
+    ['ん-ん', 'っ-っ', 'ー-ー', '、-、', '。-。', '？-？', '！-！'],
+    ['あ-お', 'か-こ', 'さ-そ', 'た-と', 'な-の', 'は-ほ', 'ま-も'],
+    ['や-よ', 'ら-ろ', 'わ-ん', 'が-ご', 'ざ-ぞ', 'だ-ど', 'ば-ぼ'],
+    ['ぱ-ぽ', 'きゃ-きょ', 'しゃ-しょ', 'ちゃ-ちょ', 'にゃ-にょ', 'ひゃ-ひょ', 'みゃ-みょ']
+  ]
+
+  for (let week = 1; week <= 20; week++) {
+    const isHiraganaWeek = week <= 10
+    const groupIndex = (week - 1) % 10
+    const hiraganaGroup = hiraganaGroups[groupIndex]
+    
+    const weekTitle = isHiraganaWeek 
+      ? `Week ${week}: Hiragana ${hiraganaGroup[0]}`
+      : `Week ${week}: Katakana ${hiraganaGroup[0]}`
+
+    weeks.push({
+      id: week.toString(),
+      title: weekTitle,
+      order: week,
+      hiraganaGroup: hiraganaGroup[0],
+      isCompleted: false,
+      progress: 0
+    })
   }
-]
+  
+  return weeks
+}
 
 export default function HomePage() {
-  const { loadDemoData, isDemo, toggleTask } = useProgressStore()
+  const { loadDemoData, isDemo, progress } = useProgressStore()
+  const [weeks] = useState(generateWeeks())
 
   useEffect(() => {
     loadDemoData()
   }, [loadDemoData])
 
-  const handleTaskToggle = (taskId: string, completed: boolean) => {
-    toggleTask(taskId, completed)
-  }
+  // Calculate progress for each week
+  const weeksWithProgress = weeks.map(week => {
+    const weekTasks = 70 // 10 tasks per day × 7 days
+    const completedTasks = progress.filter(p => 
+      p.task_id.startsWith(`${week.id}-`)
+    ).length
+    const progressPercentage = Math.round((completedTasks / weekTasks) * 100)
+    
+    return {
+      ...week,
+      progress: progressPercentage,
+      isCompleted: progressPercentage === 100
+    }
+  })
+
+  const totalProgress = Math.round(
+    weeksWithProgress.reduce((sum, week) => sum + week.progress, 0) / 20
+  )
 
   return (
-    <div className="min-h-screen">
-      <Hero />
-      
-      {/* Demo Mode Notice */}
-      {isDemo && (
-        <div className="bg-blue-50 border-b border-blue-200 py-4">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5 text-blue-600" />
-                <span className="text-sm font-medium text-blue-800">
-                  Demo Mode - Your progress is saved locally
-                </span>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              JLPT N5 Study Roadmap
+            </h1>
+            <p className="text-xl text-gray-600 mb-6">
+              Master Japanese in 20 weeks with 8 hiragana per day
+            </p>
+            
+            {/* Overall Progress */}
+            <div className="max-w-md mx-auto mb-8">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium text-gray-700">Overall Progress</span>
+                <span className="text-sm font-medium text-gray-700">{totalProgress}%</span>
               </div>
-              <Button asChild size="sm" variant="outline">
-                <Link href="/auth/signup">Sign up to save progress</Link>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div 
+                  className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                  style={{ width: `${totalProgress}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button asChild size="lg">
+                <Link href="/roadmap">
+                  <BookOpen className="h-5 w-5 mr-2" />
+                  Start Learning
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/dashboard">
+                  <Target className="h-5 w-5 mr-2" />
+                  View Dashboard
+                </Link>
               </Button>
             </div>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Roadmap Preview */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              20-Week Study Roadmap
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Follow our structured curriculum designed by Japanese language experts. 
-              Each week builds upon the previous one, ensuring steady progress.
-            </p>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
-            <Card className="text-center">
-              <CardHeader className="pb-2">
-                <Target className="h-8 w-8 text-blue-600 mx-auto" />
-                <CardTitle className="text-2xl">1,400</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>Total Tasks</CardDescription>
-              </CardContent>
-            </Card>
-            
-            <Card className="text-center">
-              <CardHeader className="pb-2">
-                <Clock className="h-8 w-8 text-green-600 mx-auto" />
-                <CardTitle className="text-2xl">20</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>Weeks</CardDescription>
-              </CardContent>
-            </Card>
-            
-            <Card className="text-center">
-              <CardHeader className="pb-2">
-                <BookOpen className="h-8 w-8 text-purple-600 mx-auto" />
-                <CardTitle className="text-2xl">6</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>Categories</CardDescription>
-              </CardContent>
-            </Card>
-            
-            <Card className="text-center">
-              <CardHeader className="pb-2">
-                <Users className="h-8 w-8 text-orange-600 mx-auto" />
-                <CardTitle className="text-2xl">140</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>Days</CardDescription>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Week Capsules Preview */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold">Study Weeks</h3>
-              <Button asChild>
-                <Link href="/roadmap">View Full Roadmap</Link>
-              </Button>
+      {/* Progress Calendar */}
+      <div className="container mx-auto px-4 py-8">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-6 w-6 text-blue-600" />
+              Study Progress Calendar
+            </CardTitle>
+            <CardDescription>
+              Track your weekly progress through the 20-week curriculum
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {weeksWithProgress.map((week) => (
+                <Card 
+                  key={week.id} 
+                  className={`cursor-pointer transition-all hover:shadow-md ${
+                    week.isCompleted 
+                      ? 'bg-green-50 border-green-200' 
+                      : week.progress > 0 
+                        ? 'bg-blue-50 border-blue-200' 
+                        : 'bg-gray-50 border-gray-200'
+                  }`}
+                >
+                  <CardContent className="p-4 text-center">
+                    <div className="flex items-center justify-center mb-2">
+                      {week.isCompleted ? (
+                        <CheckCircle className="h-6 w-6 text-green-600" />
+                      ) : week.progress > 0 ? (
+                        <Circle className="h-6 w-6 text-blue-600" />
+                      ) : (
+                        <Circle className="h-6 w-6 text-gray-400" />
+                      )}
+                    </div>
+                    <div className="text-sm font-medium text-gray-900 mb-1">
+                      Week {week.order}
+                    </div>
+                    <div className="text-xs text-gray-600 mb-2">
+                      {week.hiraganaGroup}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {week.progress}%
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-            
-            {mockWeeks.map((week) => (
-              <WeekCapsule
-                key={week.id}
-                week={week}
-                isDemo={isDemo}
-                onTaskToggle={handleTaskToggle}
-              />
-            ))}
-            
-            <Card className="border-dashed border-2 border-gray-300">
-              <CardContent className="flex items-center justify-center py-8">
-                <div className="text-center">
-                  <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-600 mb-2">
-                    And 18 more weeks...
-                  </h3>
-                  <p className="text-gray-500 mb-4">
-                    Complete roadmap with hiragana, katakana, vocabulary, grammar, listening, and reading
-                  </p>
-                  <Button asChild>
-                    <Link href="/roadmap">View Complete Roadmap</Link>
-                  </Button>
+          </CardContent>
+        </Card>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+          <Card className="text-center">
+            <CardContent className="p-6">
+              <div className="text-2xl font-bold text-blue-600 mb-1">20</div>
+              <div className="text-sm text-gray-600">Weeks</div>
+            </CardContent>
+          </Card>
+          <Card className="text-center">
+            <CardContent className="p-6">
+              <div className="text-2xl font-bold text-green-600 mb-1">140</div>
+              <div className="text-sm text-gray-600">Days</div>
+            </CardContent>
+          </Card>
+          <Card className="text-center">
+            <CardContent className="p-6">
+              <div className="text-2xl font-bold text-purple-600 mb-1">1,120</div>
+              <div className="text-sm text-gray-600">Hiragana Tasks</div>
+            </CardContent>
+          </Card>
+          <Card className="text-center">
+            <CardContent className="p-6">
+              <div className="text-2xl font-bold text-orange-600 mb-1">280</div>
+              <div className="text-sm text-gray-600">Other Tasks</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Demo Mode Notice */}
+        {isDemo && (
+          <Card className="mt-8 bg-blue-50 border-blue-200">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-800">
+                    Demo Mode - Your progress is saved locally
+                  </span>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Why Choose Our Roadmap?
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Our curriculum is designed by Japanese language experts and tested by thousands of students.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card>
-              <CardHeader>
-                <Target className="h-8 w-8 text-blue-600 mb-2" />
-                <CardTitle>Structured Learning</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>
-                  Each week builds upon the previous one, ensuring you master each concept before moving on.
-                </CardDescription>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <BookOpen className="h-8 w-8 text-green-600 mb-2" />
-                <CardTitle>Comprehensive Coverage</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>
-                  Covers all JLPT N5 topics: hiragana, katakana, vocabulary, grammar, listening, and reading.
-                </CardDescription>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <Users className="h-8 w-8 text-purple-600 mb-2" />
-                <CardTitle>Progress Tracking</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>
-                  Visual charts and analytics help you stay motivated and track your improvement over time.
-                </CardDescription>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
+                <Button asChild size="sm" variant="outline">
+                  <Link href="/auth/signup">Sign up to save progress</Link>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   )
 }

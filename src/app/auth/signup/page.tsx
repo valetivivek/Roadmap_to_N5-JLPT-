@@ -62,7 +62,10 @@ export default function SignUpPage() {
         }
       }
 
-      setMessage('Check your email to confirm your account!')
+      setMessage('Account created successfully! Redirecting to dashboard...')
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 2000)
     } catch (error: any) {
       setMessage(error.message)
     } finally {

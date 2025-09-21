@@ -9,49 +9,88 @@ import { useProgressStore } from '@/stores/useProgressStore'
 import { RoadmapWeek } from '@/types'
 import { BookOpen, Target, Calendar, Award } from 'lucide-react'
 
-// Mock data for the complete 20-week roadmap
-const generateMockRoadmap = (): RoadmapWeek[] => {
+// Generate proper 20-week roadmap with 8 hiragana per day
+const generateRoadmap = (): RoadmapWeek[] => {
   const weeks: RoadmapWeek[] = []
   
+  // Hiragana characters organized by groups (8 per day)
+  const hiraganaGroups = [
+    ['あ', 'い', 'う', 'え', 'お'], // a-o
+    ['か', 'き', 'く', 'け', 'こ'], // ka-ko
+    ['さ', 'し', 'す', 'せ', 'そ'], // sa-so
+    ['た', 'ち', 'つ', 'て', 'と'], // ta-to
+    ['な', 'に', 'ぬ', 'ね', 'の'], // na-no
+    ['は', 'ひ', 'ふ', 'へ', 'ほ'], // ha-ho
+    ['ま', 'み', 'む', 'め', 'も'], // ma-mo
+    ['や', 'ゆ', 'よ'], // ya-yu-yo
+    ['ら', 'り', 'る', 'れ', 'ろ'], // ra-ro
+    ['わ', 'を', 'ん'] // wa-wo-n
+  ]
+
+  // Katakana characters (same groups)
+  const katakanaGroups = [
+    ['ア', 'イ', 'ウ', 'エ', 'オ'], // a-o
+    ['カ', 'キ', 'ク', 'ケ', 'コ'], // ka-ko
+    ['サ', 'シ', 'ス', 'セ', 'ソ'], // sa-so
+    ['タ', 'チ', 'ツ', 'テ', 'ト'], // ta-to
+    ['ナ', 'ニ', 'ヌ', 'ネ', 'ノ'], // na-no
+    ['ハ', 'ヒ', 'フ', 'ヘ', 'ホ'], // ha-ho
+    ['マ', 'ミ', 'ム', 'メ', 'モ'], // ma-mo
+    ['ヤ', 'ユ', 'ヨ'], // ya-yu-yo
+    ['ラ', 'リ', 'ル', 'レ', 'ロ'], // ra-ro
+    ['ワ', 'ヲ', 'ン'] // wa-wo-n
+  ]
+
   for (let week = 1; week <= 20; week++) {
     const isHiraganaWeek = week <= 10
-    const isKatakanaWeek = week > 10
+    const groupIndex = (week - 1) % 10
+    const characters = isHiraganaWeek ? hiraganaGroups[groupIndex] : katakanaGroups[groupIndex]
+    const scriptType = isHiraganaWeek ? 'Hiragana' : 'Katakana'
     
-    let weekTitle = ''
-    if (isHiraganaWeek) {
-      const hiraganaGroups = [
-        'a-o', 'ka-ko', 'sa-so', 'ta-to', 'na-no',
-        'ha-ho', 'ma-mo', 'ya-yo', 'ra-ro', 'wa-n'
-      ]
-      weekTitle = `Week ${week}: Hiragana ${hiraganaGroups[week - 1]}`
-    } else {
-      const katakanaGroups = [
-        'a-o', 'ka-ko', 'sa-so', 'ta-to', 'na-no',
-        'ha-ho', 'ma-mo', 'ya-yo', 'ra-ro', 'wa-n'
-      ]
-      weekTitle = `Week ${week}: Katakana ${katakanaGroups[week - 11]}`
-    }
+    const weekTitle = `Week ${week}: ${scriptType} ${characters[0]}-${characters[characters.length - 1]}`
 
     const days = []
     for (let day = 1; day <= 7; day++) {
-      const dayTitle = `Day ${day}: ${isHiraganaWeek ? 'Hiragana' : 'Katakana'} ${getDayContent(week, day)}`
+      const dayTitle = `Day ${day}: ${scriptType} ${characters[0]}-${characters[characters.length - 1]}`
       
       const tasks = []
-      for (let task = 1; task <= 10; task++) {
-        const categories = ['hiragana', 'katakana', 'vocab', 'grammar', 'listening', 'reading']
-        const category = isHiraganaWeek ? 'hiragana' : 'katakana'
-        const points = Math.floor(Math.random() * 3) + 1
+      
+      // 8 hiragana/katakana tasks per day
+      for (let i = 0; i < 8; i++) {
+        const charIndex = i % characters.length
+        const character = characters[charIndex]
+        const romaji = getRomaji(character, isHiraganaWeek)
         
         tasks.push({
-          id: `${week}-${day}-${task}`,
+          id: `${week}-${day}-${i + 1}`,
           day_id: `${week}-${day}`,
-          label: `Task ${task}: Learn ${isHiraganaWeek ? 'hiragana' : 'katakana'} character`,
-          category: category as any,
-          points,
+          label: `Learn ${scriptType} ${character} (${romaji})`,
+          category: isHiraganaWeek ? 'hiragana' : 'katakana',
+          points: 1,
           created_at: '',
           updated_at: ''
         })
       }
+      
+      // 2 additional tasks (vocabulary, grammar, listening, reading)
+      const additionalTasks = [
+        { label: 'Practice writing exercises', category: isHiraganaWeek ? 'hiragana' : 'katakana', points: 2 },
+        { label: 'Learn vocabulary words', category: 'vocab', points: 1 },
+        { label: 'Practice pronunciation', category: 'listening', points: 1 },
+        { label: 'Read simple sentences', category: 'reading', points: 1 }
+      ]
+      
+      additionalTasks.forEach((task, index) => {
+        tasks.push({
+          id: `${week}-${day}-${8 + index + 1}`,
+          day_id: `${week}-${day}`,
+          label: task.label,
+          category: task.category as any,
+          points: task.points,
+          created_at: '',
+          updated_at: ''
+        })
+      })
 
       days.push({
         id: `${week}-${day}`,
@@ -77,36 +116,52 @@ const generateMockRoadmap = (): RoadmapWeek[] => {
   return weeks
 }
 
-const getDayContent = (week: number, day: number): string => {
-  if (week <= 10) {
-    const hiraganaGroups = [
-      ['あ-お', 'か-こ', 'さ-そ', 'た-と', 'な-の', 'は-ほ', 'ま-も'],
-      ['や-よ', 'ら-ろ', 'わ-ん', 'が-ご', 'ざ-ぞ', 'だ-ど', 'ば-ぼ'],
-      ['ぱ-ぽ', 'きゃ-きょ', 'しゃ-しょ', 'ちゃ-ちょ', 'にゃ-にょ', 'ひゃ-ひょ', 'みゃ-みょ'],
-      ['りゃ-りょ', 'ぎゃ-ぎょ', 'じゃ-じょ', 'びゃ-びょ', 'ぴゃ-ぴょ', 'く-く', 'ぐ-ぐ'],
-      ['す-す', 'ず-ず', 'つ-つ', 'づ-づ', 'ぬ-ぬ', 'ふ-ふ', 'ぶ-ぶ'],
-      ['ぷ-ぷ', 'む-む', 'ゆ-ゆ', 'よ-よ', 'る-る', 'わ-わ', 'を-を'],
-      ['ん-ん', 'っ-っ', 'ー-ー', '、-、', '。-。', '？-？', '！-！'],
-      ['あ-お', 'か-こ', 'さ-そ', 'た-と', 'な-の', 'は-ほ', 'ま-も'],
-      ['や-よ', 'ら-ろ', 'わ-ん', 'が-ご', 'ざ-ぞ', 'だ-ど', 'ば-ぼ'],
-      ['ぱ-ぽ', 'きゃ-きょ', 'しゃ-しょ', 'ちゃ-ちょ', 'にゃ-にょ', 'ひゃ-ひょ', 'みゃ-みょ']
-    ]
-    return hiraganaGroups[week - 1]?.[day - 1] || 'あ-お'
-  } else {
-    const katakanaGroups = [
-      ['ア-オ', 'カ-コ', 'サ-ソ', 'タ-ト', 'ナ-ノ', 'ハ-ホ', 'マ-モ'],
-      ['ヤ-ヨ', 'ラ-ロ', 'ワ-ン', 'ガ-ゴ', 'ザ-ゾ', 'ダ-ド', 'バ-ボ'],
-      ['パ-ポ', 'キャ-キョ', 'シャ-ショ', 'チャ-チョ', 'ニャ-ニョ', 'ヒャ-ヒョ', 'ミャ-ミョ'],
-      ['リャ-リョ', 'ギャ-ギョ', 'ジャ-ジョ', 'ビャ-ビョ', 'ピャ-ピョ', 'ク-ク', 'グ-グ'],
-      ['ス-ス', 'ズ-ズ', 'ツ-ツ', 'ヅ-ヅ', 'ヌ-ヌ', 'フ-フ', 'ブ-ブ'],
-      ['プ-プ', 'ム-ム', 'ユ-ユ', 'ヨ-ヨ', 'ル-ル', 'ワ-ワ', 'ヲ-ヲ'],
-      ['ン-ン', 'ッ-ッ', 'ー-ー', '、-、', '。-。', '？-？', '！-！'],
-      ['ア-オ', 'カ-コ', 'サ-ソ', 'タ-ト', 'ナ-ノ', 'ハ-ホ', 'マ-モ'],
-      ['ヤ-ヨ', 'ラ-ロ', 'ワ-ン', 'ガ-ゴ', 'ザ-ゾ', 'ダ-ド', 'バ-ボ'],
-      ['パ-ポ', 'キャ-キョ', 'シャ-ショ', 'チャ-チョ', 'ニャ-ニョ', 'ヒャ-ヒョ', 'ミャ-ミョ']
-    ]
-    return katakanaGroups[week - 11]?.[day - 1] || 'ア-オ'
+// Helper function to get romaji for characters
+const getRomaji = (character: string, isHiragana: boolean): string => {
+  const hiraganaMap: { [key: string]: string } = {
+    'あ': 'a', 'い': 'i', 'う': 'u', 'え': 'e', 'お': 'o',
+    'か': 'ka', 'き': 'ki', 'く': 'ku', 'け': 'ke', 'こ': 'ko',
+    'さ': 'sa', 'し': 'shi', 'す': 'su', 'せ': 'se', 'そ': 'so',
+    'た': 'ta', 'ち': 'chi', 'つ': 'tsu', 'て': 'te', 'と': 'to',
+    'な': 'na', 'に': 'ni', 'ぬ': 'nu', 'ね': 'ne', 'の': 'no',
+    'は': 'ha', 'ひ': 'hi', 'ふ': 'fu', 'へ': 'he', 'ほ': 'ho',
+    'ま': 'ma', 'み': 'mi', 'む': 'mu', 'め': 'me', 'も': 'mo',
+    'や': 'ya', 'ゆ': 'yu', 'よ': 'yo',
+    'ら': 'ra', 'り': 'ri', 'る': 'ru', 'れ': 're', 'ろ': 'ro',
+    'わ': 'wa', 'を': 'wo', 'ん': 'n'
   }
+  
+  const katakanaMap: { [key: string]: string } = {
+    'ア': 'a', 'イ': 'i', 'ウ': 'u', 'エ': 'e', 'オ': 'o',
+    'カ': 'ka', 'キ': 'ki', 'ク': 'ku', 'ケ': 'ke', 'コ': 'ko',
+    'サ': 'sa', 'シ': 'shi', 'ス': 'su', 'セ': 'se', 'ソ': 'so',
+    'タ': 'ta', 'チ': 'chi', 'ツ': 'tsu', 'テ': 'te', 'ト': 'to',
+    'ナ': 'na', 'ニ': 'ni', 'ヌ': 'nu', 'ネ': 'ne', 'ノ': 'no',
+    'ハ': 'ha', 'ヒ': 'hi', 'フ': 'fu', 'ヘ': 'he', 'ホ': 'ho',
+    'マ': 'ma', 'ミ': 'mi', 'ム': 'mu', 'メ': 'me', 'モ': 'mo',
+    'ヤ': 'ya', 'ユ': 'yu', 'ヨ': 'yo',
+    'ラ': 'ra', 'リ': 'ri', 'ル': 'ru', 'レ': 're', 'ロ': 'ro',
+    'ワ': 'wa', 'ヲ': 'wo', 'ン': 'n'
+  }
+  
+  return isHiragana ? hiraganaMap[character] || character : katakanaMap[character] || character
+}
+
+// Group weeks in pairs for better organization
+const groupWeeksInPairs = (weeks: RoadmapWeek[]) => {
+  const groupedWeeks = []
+  for (let i = 0; i < weeks.length; i += 2) {
+    const week1 = weeks[i]
+    const week2 = weeks[i + 1]
+    
+    groupedWeeks.push({
+      id: `group-${Math.floor(i / 2) + 1}`,
+      title: week2 ? `Weeks ${week1.order}-${week2.order}` : `Week ${week1.order}`,
+      weeks: week2 ? [week1, week2] : [week1],
+      phase: week1.order <= 10 ? 'Hiragana' : 'Katakana'
+    })
+  }
+  return groupedWeeks
 }
 
 export default function RoadmapPage() {
@@ -116,8 +171,8 @@ export default function RoadmapPage() {
 
   useEffect(() => {
     loadDemoData()
-    // Generate mock roadmap data
-    setRoadmap(generateMockRoadmap())
+    // Generate proper roadmap data
+    setRoadmap(generateRoadmap())
     setIsLoading(false)
   }, [loadDemoData])
 
@@ -136,6 +191,8 @@ export default function RoadmapPage() {
     )
   }
 
+  const groupedWeeks = groupWeeksInPairs(roadmap)
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
@@ -145,7 +202,7 @@ export default function RoadmapPage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Study Roadmap</h1>
               <p className="text-gray-600 mt-2">
-                Your complete 20-week journey to JLPT N5 mastery
+                Master Japanese in 20 weeks with 8 hiragana per day
               </p>
             </div>
             <div className="flex items-center gap-4">
@@ -172,11 +229,11 @@ export default function RoadmapPage() {
               Roadmap Overview
             </CardTitle>
             <CardDescription>
-              Follow this structured 20-week curriculum to master all JLPT N5 topics
+              Structured 20-week curriculum with 8 hiragana/katakana per day
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="text-center">
                 <div className="text-3xl font-bold text-blue-600 mb-2">20</div>
                 <div className="text-sm text-muted-foreground">Weeks</div>
@@ -186,8 +243,12 @@ export default function RoadmapPage() {
                 <div className="text-sm text-muted-foreground">Days</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600 mb-2">1,400</div>
-                <div className="text-sm text-muted-foreground">Tasks</div>
+                <div className="text-3xl font-bold text-purple-600 mb-2">1,120</div>
+                <div className="text-sm text-muted-foreground">Hiragana Tasks</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-orange-600 mb-2">280</div>
+                <div className="text-sm text-muted-foreground">Other Tasks</div>
               </div>
             </div>
           </CardContent>
@@ -208,7 +269,7 @@ export default function RoadmapPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Master the hiragana syllabary, basic vocabulary, and essential grammar patterns.
+                  Master the hiragana syllabary with 8 characters per day, plus vocabulary and grammar.
                 </p>
               </CardContent>
             </Card>
@@ -222,23 +283,46 @@ export default function RoadmapPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Learn katakana, advanced vocabulary, and prepare for the JLPT N5 exam.
+                  Learn katakana with 8 characters per day, plus advanced vocabulary and JLPT N5 prep.
                 </p>
               </CardContent>
             </Card>
           </div>
         </div>
 
-        {/* Week Capsules */}
-        <div className="space-y-4">
+        {/* Grouped Week Capsules */}
+        <div className="space-y-6">
           <h2 className="text-2xl font-bold mb-6">Study Weeks</h2>
-          {roadmap.map((week) => (
-            <WeekCapsule
-              key={week.id}
-              week={week}
-              isDemo={isDemo}
-              onTaskToggle={handleTaskToggle}
-            />
+          {groupedWeeks.map((group) => (
+            <Card key={group.id} className="overflow-hidden">
+              <CardHeader className="bg-gray-50">
+                <CardTitle className="flex items-center gap-2">
+                  <div className={`h-3 w-3 rounded-full ${
+                    group.phase === 'Hiragana' ? 'bg-blue-500' : 'bg-green-500'
+                  }`} />
+                  {group.title} - {group.phase}
+                </CardTitle>
+                <CardDescription>
+                  {group.weeks.length === 2 
+                    ? `Complete both weeks to master ${group.phase} fundamentals`
+                    : `Final week of ${group.phase} mastery`
+                  }
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+                  {group.weeks.map((week) => (
+                    <div key={week.id} className="border-r last:border-r-0">
+                      <WeekCapsule
+                        week={week}
+                        isDemo={isDemo}
+                        onTaskToggle={handleTaskToggle}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
 
@@ -247,11 +331,11 @@ export default function RoadmapPage() {
           <CardContent className="text-center py-12">
             <Award className="h-16 w-16 text-blue-600 mx-auto mb-4" />
             <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Ready to Start Your Journey?
+              Ready to Master Japanese?
             </h3>
             <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-              Join thousands of students who have successfully passed the JLPT N5 
-              using our structured roadmap. Start today and track your progress!
+              Follow our proven 20-week roadmap with 8 hiragana per day. 
+              Join thousands who have successfully passed JLPT N5!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="text-lg px-8">

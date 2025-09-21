@@ -18,7 +18,9 @@ import {
   Settings, 
   LogOut, 
   Menu,
-  X
+  X,
+  Calendar,
+  FileText
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { useProgressStore } from '@/stores/useProgressStore'
@@ -85,8 +87,8 @@ export default function TopNav() {
   }
 
   const navItems = [
-    { href: '/roadmap', label: 'Roadmap', icon: BookOpen },
-    { href: '/resources', label: 'Resources', icon: BookOpen },
+    { href: '/roadmap', label: 'Study Roadmap', icon: Calendar },
+    { href: '/resources', label: 'Global Resources', icon: FileText },
   ]
 
   return (
@@ -118,17 +120,20 @@ export default function TopNav() {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                    <div className="h-6 w-6 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-medium">
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0 hover:bg-gray-100 transition-colors">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-sm font-semibold shadow-md ring-2 ring-blue-100 hover:ring-blue-200 transition-all">
                       {profile?.display_name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end">
-                  <div className="flex items-center justify-start gap-2 p-2">
-                    <div className="flex flex-col space-y-1 leading-none">
-                      <p className="font-medium">{profile?.display_name || user?.email}</p>
-                      <p className="text-xs text-muted-foreground">
+                <DropdownMenuContent className="w-64" align="end">
+                  <div className="flex items-center gap-3 p-3">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-sm font-semibold shadow-md">
+                      {profile?.display_name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    <div className="flex flex-col space-y-1 leading-none min-w-0 flex-1">
+                      <p className="font-medium text-sm truncate">{profile?.display_name || user?.email}</p>
+                      <p className="text-xs text-muted-foreground truncate">
                         {isDemo ? 'Demo Mode' : user?.email}
                       </p>
                     </div>
