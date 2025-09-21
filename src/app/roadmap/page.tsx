@@ -168,13 +168,59 @@ export default function RoadmapPage() {
   const { isDemo, toggleTask, loadDemoData } = useProgressStore()
   const [roadmap, setRoadmap] = useState<RoadmapWeek[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     loadDemoData()
-    // Generate proper roadmap data
-    setRoadmap(generateRoadmap())
-    setIsLoading(false)
-  }, [loadDemoData])
+    fetchRoadmapData()
+  }, [loadDemoData, isDemo])
+
+  const fetchRoadmapData = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+
+      // If in demo mode, use generated data
+      if (isDemo) {
+        setRoadmap(generateRoadmap())
+        setIsLoading(false)
+        return
+      }
+
+      // Try to fetch real data from Supabase
+      const { createClient } = await import('@/lib/supabase')
+      const supabase = createClient()
+
+      const { data: weeks, error: weeksError } = await supabase
+        .from('roadmap_weeks')
+        .select(`
+          *,
+          days:roadmap_days(
+            *,
+            tasks(*)
+          )
+        `)
+        .order('order')
+
+      if (weeksError) {
+        console.error('Error fetching roadmap:', weeksError)
+        // Fallback to generated data if database fetch fails
+        setRoadmap(generateRoadmap())
+      } else if (weeks && weeks.length > 0) {
+        setRoadmap(weeks)
+      } else {
+        // No data in database, use generated data
+        setRoadmap(generateRoadmap())
+      }
+    } catch (err: any) {
+      console.error('Failed to fetch roadmap:', err)
+      setError(err.message)
+      // Fallback to generated data
+      setRoadmap(generateRoadmap())
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleTaskToggle = (taskId: string, completed: boolean) => {
     toggleTask(taskId, completed)
@@ -187,6 +233,24 @@ export default function RoadmapPage() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading roadmap...</p>
         </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-red-600">Error Loading Roadmap</CardTitle>
+            <CardDescription>{error}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={fetchRoadmapData} className="w-full">
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     )
   }

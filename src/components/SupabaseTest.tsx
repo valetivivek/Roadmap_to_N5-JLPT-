@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 export default function SupabaseTest() {
   const [testResults, setTestResults] = useState<string[]>([])
   const [isRunning, setIsRunning] = useState(false)
+  const [isSeeding, setIsSeeding] = useState(false)
   const supabase = createClient()
 
   const runTests = async () => {
@@ -78,6 +79,33 @@ export default function SupabaseTest() {
     setIsRunning(false)
   }
 
+  const seedDatabase = async () => {
+    setIsSeeding(true)
+    try {
+      // This would need to be implemented as an API route
+      // For now, just show instructions
+      const results = [
+        '🌱 Database Seeding Required',
+        '',
+        'Your database is empty and needs to be seeded with roadmap data.',
+        '',
+        'To fix this:',
+        '1. Create a .env.local file with your Supabase credentials',
+        '2. Add your SUPABASE_SERVICE_ROLE_KEY',
+        '3. Run: npm run seed',
+        '',
+        'Or manually run the SQL scripts in your Supabase dashboard.',
+        '',
+        'See seed-database.md for detailed instructions.'
+      ]
+      setTestResults(results)
+    } catch (err: any) {
+      setTestResults([`❌ Seeding failed: ${err.message}`])
+    } finally {
+      setIsSeeding(false)
+    }
+  }
+
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
@@ -87,13 +115,23 @@ export default function SupabaseTest() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Button 
-          onClick={runTests} 
-          disabled={isRunning}
-          className="w-full"
-        >
-          {isRunning ? 'Running Tests...' : 'Run Diagnostic Tests'}
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={runTests} 
+            disabled={isRunning || isSeeding}
+            className="flex-1"
+          >
+            {isRunning ? 'Running Tests...' : 'Run Diagnostic Tests'}
+          </Button>
+          <Button 
+            onClick={seedDatabase} 
+            disabled={isRunning || isSeeding}
+            variant="outline"
+            className="flex-1"
+          >
+            {isSeeding ? 'Seeding...' : 'Seed Database'}
+          </Button>
+        </div>
         
         {testResults.length > 0 && (
           <div className="bg-gray-50 p-4 rounded-md">
