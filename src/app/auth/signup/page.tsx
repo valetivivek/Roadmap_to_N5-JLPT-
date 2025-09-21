@@ -186,7 +186,7 @@ export default function SignUpPage() {
 
         {/* Features */}
         <div className="text-center">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">What you'll get:</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">What you&apos;ll get:</h3>
           <div className="grid grid-cols-1 gap-4 text-sm text-gray-600">
             <div className="flex items-center justify-center gap-2">
               <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
