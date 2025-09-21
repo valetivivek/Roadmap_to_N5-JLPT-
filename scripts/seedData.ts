@@ -193,7 +193,7 @@ export const roadmapData: Week[] = [
             ]
           },
           {
-            label: 'Complete hiragana recognition quiz (あ-こ)',
+            label: 'Practice hiragana recognition (あ-こ)',
             category: 'hiragana',
             points: 2,
             resources: [
@@ -223,7 +223,7 @@ export const roadmapData: Week[] = [
             ]
           },
           {
-            label: 'Complete hiragana recognition quiz (さ-と)',
+            label: 'Practice hiragana recognition (さ-と)',
             category: 'hiragana',
             points: 2,
             resources: [
@@ -253,7 +253,7 @@ export const roadmapData: Week[] = [
             ]
           },
           {
-            label: 'Complete hiragana recognition quiz (な-ほ)',
+            label: 'Complete hiragana recognition practice (な-ほ)',
             category: 'hiragana',
             points: 2,
             resources: [
@@ -283,7 +283,7 @@ export const roadmapData: Week[] = [
             ]
           },
           {
-            label: 'Complete hiragana recognition quiz (ま-よ)',
+            label: 'Complete hiragana recognition practice (ま-よ)',
             category: 'hiragana',
             points: 2,
             resources: [
@@ -408,7 +408,7 @@ export const roadmapData: Week[] = [
             ]
           },
           {
-            label: 'Complete katakana recognition quiz (ア-コ)',
+            label: 'Complete katakana recognition practice (ア-コ)',
             category: 'katakana',
             points: 2,
             resources: [
@@ -438,7 +438,7 @@ export const roadmapData: Week[] = [
             ]
           },
           {
-            label: 'Complete katakana recognition quiz (サ-ト)',
+            label: 'Complete katakana recognition practice (サ-ト)',
             category: 'katakana',
             points: 2,
             resources: [
@@ -468,7 +468,7 @@ export const roadmapData: Week[] = [
             ]
           },
           {
-            label: 'Complete katakana recognition quiz (ナ-ホ)',
+            label: 'Complete katakana recognition practice (ナ-ホ)',
             category: 'katakana',
             points: 2,
             resources: [
@@ -498,7 +498,7 @@ export const roadmapData: Week[] = [
             ]
           },
           {
-            label: 'Complete katakana recognition quiz (マ-ヨ)',
+            label: 'Complete katakana recognition practice (マ-ヨ)',
             category: 'katakana',
             points: 2,
             resources: [
@@ -786,7 +786,7 @@ export const roadmapData: Week[] = [
         title: 'Day 21: Week 3 Assessment',
         tasks: [
           {
-            label: 'Take vocabulary quiz (numbers, family, colors)',
+            label: 'Take vocabulary practice (numbers, family, colors)',
             category: 'vocab',
             points: 4,
             resources: [

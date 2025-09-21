@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { useProgressStore } from '@/stores/useProgressStore'
 import { UserProgress } from '@/types'
 import { createClient } from '@/lib/supabase'
+import SyncStatus from '@/components/SyncStatus'
 import { 
   Target, 
   TrendingUp, 
@@ -163,10 +164,11 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center gap-4">
                 {isDemo && (
-                  <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                  <Badge className="bg-blue-50 text-blue-700 border-blue-200">
                     Demo Mode
                   </Badge>
                 )}
+                {!isDemo && <SyncStatus />}
                 <Button asChild>
                   <Link href="/roadmap">
                     <BookOpen className="h-4 w-4 mr-2" />

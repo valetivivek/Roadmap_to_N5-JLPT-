@@ -23,7 +23,7 @@ interface GlobalResource {
   title: string
   description: string
   url: string
-  type: 'reference' | 'practice' | 'test' | 'guide'
+  type: 'reference' | 'practice' | 'guide'
   category: 'hiragana' | 'katakana' | 'vocabulary' | 'grammar' | 'listening' | 'reading' | 'general'
   difficulty: 'beginner' | 'intermediate' | 'advanced'
   format: 'pdf' | 'video' | 'website' | 'app' | 'audio'
@@ -50,16 +50,6 @@ const globalResources: GlobalResource[] = [
     category: 'hiragana',
     difficulty: 'beginner',
     format: 'pdf'
-  },
-  {
-    id: 'hiragana-quiz',
-    title: 'Hiragana Recognition Quiz',
-    description: 'Interactive quiz to test hiragana recognition skills',
-    url: '#',
-    type: 'test',
-    category: 'hiragana',
-    difficulty: 'beginner',
-    format: 'website'
   },
 
   // Katakana Resources
@@ -152,27 +142,6 @@ const globalResources: GlobalResource[] = [
     format: 'pdf'
   },
 
-  // Mock Tests
-  {
-    id: 'n5-mock-test-1',
-    title: 'JLPT N5 Mock Test #1',
-    description: 'Full-length practice test for JLPT N5',
-    url: '#',
-    type: 'test',
-    category: 'general',
-    difficulty: 'beginner',
-    format: 'pdf'
-  },
-  {
-    id: 'n5-mock-test-2',
-    title: 'JLPT N5 Mock Test #2',
-    description: 'Second full-length practice test for JLPT N5',
-    url: '#',
-    type: 'test',
-    category: 'general',
-    difficulty: 'beginner',
-    format: 'pdf'
-  },
 
   // General Resources
   {
@@ -201,7 +170,6 @@ const getTypeIcon = (type: string) => {
   switch (type) {
     case 'reference': return <FileText className="h-4 w-4" />
     case 'practice': return <BookOpen className="h-4 w-4" />
-    case 'test': return <Award className="h-4 w-4" />
     case 'guide': return <FileText className="h-4 w-4" />
     default: return <FileText className="h-4 w-4" />
   }
@@ -256,7 +224,6 @@ export default function ResourcesPage() {
     { value: 'all', label: 'All Types' },
     { value: 'reference', label: 'Reference' },
     { value: 'practice', label: 'Practice' },
-    { value: 'test', label: 'Tests' },
     { value: 'guide', label: 'Guides' }
   ]
 
@@ -398,9 +365,9 @@ export default function ResourcesPage() {
           <Card className="text-center">
             <CardContent className="p-6">
               <div className="text-2xl font-bold text-purple-600 mb-1">
-                {globalResources.filter(r => r.type === 'test').length}
+                {globalResources.filter(r => r.type === 'guide').length}
               </div>
-              <div className="text-sm text-gray-600">Mock Tests</div>
+              <div className="text-sm text-gray-600">Guides</div>
             </CardContent>
           </Card>
           <Card className="text-center">

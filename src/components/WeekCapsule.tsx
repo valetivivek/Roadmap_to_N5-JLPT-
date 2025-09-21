@@ -56,6 +56,7 @@ export default function WeekCapsule({
 
   const getWeekStatus = () => {
     if (isWeekCompleted) return 'completed'
+    if (progressPercentage >= 50) return 'almost-complete'
     if (progressPercentage > 0) return 'in-progress'
     return 'not-started'
   }
@@ -63,8 +64,16 @@ export default function WeekCapsule({
   const status = getWeekStatus()
   const statusColors = {
     completed: 'bg-green-500',
+    'almost-complete': 'bg-yellow-500',
     'in-progress': 'bg-blue-500',
     'not-started': 'bg-gray-300'
+  }
+
+  const statusLabels = {
+    completed: 'Completed',
+    'almost-complete': 'Almost Complete',
+    'in-progress': 'In Progress',
+    'not-started': 'Not Started'
   }
 
   return (
@@ -80,11 +89,14 @@ export default function WeekCapsule({
             <Badge variant="secondary" className="ml-2">
               Week {week.order}
             </Badge>
-            {isWeekCompleted && (
-              <Badge className="bg-green-100 text-green-800">
-                ✓ Completed
-              </Badge>
-            )}
+            <Badge className={`${
+              status === 'completed' ? 'bg-green-100 text-green-800' :
+              status === 'almost-complete' ? 'bg-yellow-100 text-yellow-800' :
+              status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+              'bg-gray-100 text-gray-800'
+            }`}>
+              {status === 'completed' ? '✓ ' : ''}{statusLabels[status]}
+            </Badge>
           </div>
           <div className="flex items-center gap-2">
             <div className="text-right">

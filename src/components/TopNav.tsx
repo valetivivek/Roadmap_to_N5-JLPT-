@@ -20,7 +20,8 @@ import {
   Menu,
   X,
   Calendar,
-  FileText
+  FileText,
+  Info
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase'
 import { useProgressStore } from '@/stores/useProgressStore'
@@ -89,6 +90,7 @@ export default function TopNav() {
   const navItems = [
     { href: '/roadmap', label: 'Study Roadmap', icon: Calendar },
     { href: '/resources', label: 'Global Resources', icon: FileText },
+    // { href: '/about', label: 'About', icon: Info }, // Hidden for now
   ]
 
   return (
@@ -157,6 +159,12 @@ export default function TopNav() {
                       Resources
                     </Link>
                   </DropdownMenuItem>
+                  {/* <DropdownMenuItem asChild>
+                    <Link href="/about" className="flex items-center gap-2">
+                      <Info className="h-4 w-4" />
+                      About
+                    </Link>
+                  </DropdownMenuItem> */}
                   <DropdownMenuItem asChild>
                     <Link href="/profile" className="flex items-center gap-2">
                       <User className="h-4 w-4" />
