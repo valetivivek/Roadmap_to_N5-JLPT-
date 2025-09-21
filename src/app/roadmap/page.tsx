@@ -44,6 +44,17 @@ const generateRoadmap = (): RoadmapWeek[] => {
 // Group weeks in pairs for better organization
 const groupWeeksInPairs = (weeks: RoadmapWeek[]) => {
   const groupedWeeks = []
+  
+  // Define phases for the 20-week curriculum
+  const getPhase = (weekNumber: number) => {
+    if (weekNumber <= 2) return 'Hiragana Foundation'
+    if (weekNumber <= 4) return 'Katakana Foundation'
+    if (weekNumber <= 8) return 'Basic Grammar'
+    if (weekNumber <= 12) return 'Vocabulary Building'
+    if (weekNumber <= 16) return 'Reading & Listening'
+    return 'JLPT N5 Preparation'
+  }
+  
   for (let i = 0; i < weeks.length; i += 2) {
     const week1 = weeks[i]
     const week2 = weeks[i + 1]
@@ -52,7 +63,7 @@ const groupWeeksInPairs = (weeks: RoadmapWeek[]) => {
       id: `group-${Math.floor(i / 2) + 1}`,
       title: week2 ? `Weeks ${week1.order}-${week2.order}` : `Week ${week1.order}`,
       weeks: week2 ? [week1, week2] : [week1],
-      phase: week1.order <= 10 ? 'Hiragana' : 'Katakana'
+      phase: getPhase(week1.order)
     })
   }
   return groupedWeeks
@@ -69,14 +80,15 @@ export default function RoadmapPage() {
       setIsLoading(true)
       setError(null)
 
-      // If in demo mode, use generated data
-      if (isDemo) {
-        setRoadmap(generateRoadmap())
-        setIsLoading(false)
-        return
-      }
+      // Always use generated data for now (demo mode)
+      // TODO: Implement proper Supabase integration when database is ready
+      console.log('Using generated roadmap data (20 weeks)')
+      setRoadmap(generateRoadmap())
+      setIsLoading(false)
+      return
 
-      // Try to fetch real data from Supabase
+      // Try to fetch real data from Supabase (commented out for now)
+      /*
       const { createClient } = await import('@/lib/supabase')
       const supabase = createClient()
 
@@ -101,6 +113,7 @@ export default function RoadmapPage() {
         // No data in database, use generated data
         setRoadmap(generateRoadmap())
       }
+      */
     } catch (err: any) {
       console.error('Failed to fetch roadmap:', err)
       setError(err.message)
@@ -191,7 +204,7 @@ export default function RoadmapPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               <div className="text-center">
                 <div className="text-3xl font-bold text-blue-600 mb-2">20</div>
                 <div className="text-sm text-muted-foreground">Weeks</div>
@@ -217,17 +230,31 @@ export default function RoadmapPage() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">Study Phases</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <Card className="border-blue-200 bg-blue-50">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-blue-600" />
-                  Phase 1: Scripts (Weeks 1-4)
+                  Hiragana Foundation (Weeks 1-2)
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Master hiragana and katakana with proper stroke order and pronunciation.
+                  Master hiragana with proper stroke order and pronunciation.
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-cyan-200 bg-cyan-50">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Calendar className="h-5 w-5 text-cyan-600" />
+                  Katakana Foundation (Weeks 3-4)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Learn katakana and complete the Japanese writing system.
                 </p>
               </CardContent>
             </Card>
@@ -236,40 +263,54 @@ export default function RoadmapPage() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Award className="h-5 w-5 text-green-600" />
-                  Phase 2: Grammar (Weeks 5-12)
+                  Basic Grammar (Weeks 5-8)
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Learn essential grammar patterns, particles, and sentence structures.
+                  Learn essential grammar patterns and sentence structures.
                 </p>
               </CardContent>
             </Card>
-
+            
             <Card className="border-purple-200 bg-purple-50">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <BookOpen className="h-5 w-5 text-purple-600" />
-                  Phase 3: Skills (Weeks 13-16)
+                  Vocabulary Building (Weeks 9-12)
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Develop reading and listening comprehension skills with practical exercises.
+                  Expand vocabulary with essential JLPT N5 words.
                 </p>
               </CardContent>
             </Card>
-
+            
             <Card className="border-orange-200 bg-orange-50">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Target className="h-5 w-5 text-orange-600" />
-                  Phase 4: JLPT Prep (Weeks 17-20)
+                  Reading & Listening (Weeks 13-16)
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Final preparation with practice tests and comprehensive review.
+                  Develop reading and listening comprehension skills.
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="border-red-200 bg-red-50">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Target className="h-5 w-5 text-red-600" />
+                  JLPT N5 Prep (Weeks 17-20)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Intensive preparation for the JLPT N5 examination.
                 </p>
               </CardContent>
             </Card>
@@ -277,14 +318,19 @@ export default function RoadmapPage() {
         </div>
 
         {/* Grouped Week Capsules */}
-        <div className="space-y-6">
+        <div className="space-y-8">
           <h2 className="text-2xl font-bold mb-6">Study Weeks</h2>
           {groupedWeeks.map((group) => (
             <Card key={group.id} className="overflow-hidden">
               <CardHeader className="bg-gray-50">
                 <CardTitle className="flex items-center gap-2">
                   <div className={`h-3 w-3 rounded-full ${
-                    group.phase === 'Hiragana' ? 'bg-blue-500' : 'bg-green-500'
+                    group.phase === 'Hiragana Foundation' ? 'bg-blue-500' :
+                    group.phase === 'Katakana Foundation' ? 'bg-cyan-500' :
+                    group.phase === 'Basic Grammar' ? 'bg-green-500' :
+                    group.phase === 'Vocabulary Building' ? 'bg-purple-500' :
+                    group.phase === 'Reading & Listening' ? 'bg-orange-500' :
+                    'bg-red-500'
                   }`} />
                   {group.title} - {group.phase}
                 </CardTitle>
@@ -296,9 +342,9 @@ export default function RoadmapPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
                   {group.weeks.map((week) => (
-                    <div key={week.id} className="border-r last:border-r-0">
+                    <div key={week.id} className="border-r last:border-r-0 lg:last:border-r-0 last:border-b-0 lg:last:border-b-0">
                       <WeekCapsule
                         week={week}
                         isDemo={isDemo}

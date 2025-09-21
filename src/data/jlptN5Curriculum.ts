@@ -1,4 +1,4 @@
-import { TaskCategory } from '@/types'
+import { TaskCategory } from '../types'
 
 export interface CurriculumTask {
   id: string
@@ -1114,123 +1114,12 @@ export const jlptN5Curriculum: CurriculumWeek[] = [
       }
     ]
   }
-  // Continue with weeks 6-20...
 ]
 
-// Generate remaining weeks programmatically
-const generateRemainingWeeks = (): CurriculumWeek[] => {
-  const weeks: CurriculumWeek[] = []
-  
-  const weekThemes = [
-    { title: 'Verb Conjugations', focus: ['grammar', 'vocab'], description: 'Learn present, past, and negative verb forms' },
-    { title: 'Adjective Usage', focus: ['grammar', 'vocab'], description: 'Master i-adjectives and na-adjectives' },
-    { title: 'Question Words', focus: ['grammar', 'vocab'], description: 'Learn interrogative words and question formation' },
-    { title: 'Time and Frequency', focus: ['grammar', 'vocab'], description: 'Express time, frequency, and duration' },
-    { title: 'Location and Movement', focus: ['grammar', 'vocab'], description: 'Describe locations and movement patterns' },
-    { title: 'Describing Things', focus: ['grammar', 'vocab'], description: 'Learn descriptive language and comparisons' },
-    { title: 'Making Requests', focus: ['grammar', 'vocab'], description: 'Learn polite requests and offers' },
-    { title: 'Likes and Dislikes', focus: ['grammar', 'vocab'], description: 'Express preferences and opinions' },
-    { title: 'Past Tense', focus: ['grammar', 'vocab'], description: 'Master past tense and experiences' },
-    { title: 'Future Plans', focus: ['grammar', 'vocab'], description: 'Express future intentions and plans' },
-    { title: 'Comparing Things', focus: ['grammar', 'vocab'], description: 'Learn comparison structures' },
-    { title: 'Giving Reasons', focus: ['grammar', 'vocab'], description: 'Explain reasons and causes' },
-    { title: 'Making Suggestions', focus: ['grammar', 'vocab'], description: 'Learn suggestion and advice patterns' },
-    { title: 'Reading Practice', focus: ['reading', 'vocab'], description: 'Develop reading comprehension skills' },
-    { title: 'Listening Practice', focus: ['listening', 'vocab'], description: 'Improve listening comprehension' },
-    { title: 'JLPT N5 Preparation', focus: ['grammar', 'vocab', 'reading', 'listening'], description: 'Final preparation for JLPT N5 exam' }
-  ]
-  
-  for (let weekNum = 6; weekNum <= 20; weekNum++) {
-    const theme = weekThemes[weekNum - 6]
-    const week: CurriculumWeek = {
-      id: `week-${weekNum}`,
-      weekNumber: weekNum,
-      title: theme.title,
-      description: theme.description,
-      focus: theme.focus as TaskCategory[],
-      days: []
-    }
-    
-    for (let dayNum = 1; dayNum <= 7; dayNum++) {
-      const day: CurriculumDay = {
-        id: `week-${weekNum}-day-${dayNum}`,
-        title: `Day ${(weekNum - 1) * 7 + dayNum}: ${getDayTheme(weekNum, dayNum)}`,
-        description: getDayDescription(weekNum, dayNum),
-        tasks: generateTasksForDay(weekNum, dayNum, theme.focus as TaskCategory[])
-      }
-      week.days.push(day)
-    }
-    
-    weeks.push(week)
-  }
-  
-  return weeks
-}
-
-const getDayTheme = (weekNum: number, dayNum: number): string => {
-  const themes = ['Introduction', 'Practice', 'Application', 'Review', 'Extension', 'Integration', 'Assessment']
-  return themes[dayNum - 1]
-}
-
-const getDayDescription = (weekNum: number, dayNum: number): string => {
-  const descriptions = [
-    'Introduction to new concepts and vocabulary',
-    'Practice exercises and drills',
-    'Apply knowledge in practical contexts',
-    'Review and reinforce previous learning',
-    'Extend knowledge with additional examples',
-    'Integrate multiple concepts together',
-    'Assess understanding and progress'
-  ]
-  return descriptions[dayNum - 1]
-}
-
-const generateTasksForDay = (weekNum: number, dayNum: number, focus: TaskCategory[]): CurriculumTask[] => {
-  const tasks: CurriculumTask[] = []
-  
-  // Generate tasks based on week focus
-  if (focus.includes('grammar')) {
-    tasks.push({
-      id: `week-${weekNum}-day-${dayNum}-grammar`,
-      label: `Learn grammar pattern for Week ${weekNum}`,
-      category: 'grammar',
-      points: 3,
-      description: `Master the grammar concept for week ${weekNum}`
-    })
-  }
-  
-  if (focus.includes('vocab')) {
-    tasks.push({
-      id: `week-${weekNum}-day-${dayNum}-vocab`,
-      label: `Learn vocabulary set for Week ${weekNum}`,
-      category: 'vocab',
-      points: 3,
-      description: `Expand vocabulary for week ${weekNum}`
-    })
-  }
-  
-  if (focus.includes('reading')) {
-    tasks.push({
-      id: `week-${weekNum}-day-${dayNum}-reading`,
-      label: `Practice reading comprehension`,
-      category: 'reading',
-      points: 2,
-      description: 'Develop reading skills'
-    })
-  }
-  
-  if (focus.includes('listening')) {
-    tasks.push({
-      id: `week-${weekNum}-day-${dayNum}-listening`,
-      label: `Practice listening comprehension`,
-      category: 'listening',
-      points: 2,
-      description: 'Improve listening skills'
-    })
-  }
-  
-  return tasks
-}
+// Import additional weeks from separate files
+import { weeks6to10 } from './weeks6-10'
+import { weeks11to15 } from './weeks11-15'
+import { weeks16to20 } from './weeks16-20'
 
 // Export the complete curriculum
-export const completeJLPTN5Curriculum = [...jlptN5Curriculum, ...generateRemainingWeeks()]
+export const completeJLPTN5Curriculum = [...jlptN5Curriculum, ...weeks6to10, ...weeks11to15, ...weeks16to20]
