@@ -28,7 +28,7 @@ export default function AboutPage() {
             <p className="text-gray-700 leading-relaxed">
               We believe that learning Japanese should be accessible, structured, and effective. Our 20-week JLPT N5 roadmap 
               provides a comprehensive curriculum that covers all essential areas: hiragana, katakana, grammar, vocabulary, 
-              reading, and listening. Whether you're a complete beginner or looking to refresh your knowledge, our progressive 
+              reading, and listening. Whether you&apos;re a complete beginner or looking to refresh your knowledge, our progressive 
               approach ensures you build a solid foundation for Japanese language mastery.
             </p>
           </CardContent>
@@ -250,7 +250,7 @@ export default function AboutPage() {
           <CardHeader>
             <CardTitle>Contact & Support</CardTitle>
             <CardDescription>
-              We're here to help you succeed in your Japanese learning journey
+              We&apos;re here to help you succeed in your Japanese learning journey
             </CardDescription>
           </CardHeader>
           <CardContent>

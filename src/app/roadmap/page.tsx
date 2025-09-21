@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import WeekCapsule from '@/components/WeekCapsule'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -64,12 +64,7 @@ export default function RoadmapPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    loadDemoData()
-    fetchRoadmapData()
-  }, [loadDemoData, isDemo])
-
-  const fetchRoadmapData = async () => {
+  const fetchRoadmapData = useCallback(async () => {
     try {
       setIsLoading(true)
       setError(null)
@@ -114,7 +109,12 @@ export default function RoadmapPage() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [isDemo])
+
+  useEffect(() => {
+    loadDemoData()
+    fetchRoadmapData()
+  }, [loadDemoData, fetchRoadmapData, isDemo])
 
   const handleTaskToggle = (taskId: string, completed: boolean) => {
     toggleTask(taskId, completed)
