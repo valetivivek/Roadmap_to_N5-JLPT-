@@ -269,212 +269,211 @@ export default function ResourcesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto px-4 py-8">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Learning Resources</h1>
-                <p className="text-gray-600 mt-2">
-                  Curated learning materials organized by week and day
-                </p>
-              </div>
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Learning Resources</h1>
+              <p className="text-gray-600 mt-2">
+                Curated learning materials organized by week and day
+              </p>
             </div>
           </div>
+        </div>
 
-          {/* Filters */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="text-lg">Filter Resources</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                    <Input
-                      placeholder="Search resources, tasks, or descriptions..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
+        {/* Filters */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-lg">Filter Resources</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    placeholder="Search resources, tasks, or descriptions..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
+              </div>
+              
+              <div className="flex gap-2 flex-wrap">
+                <select
+                  value={selectedKind}
+                  onChange={(e) => setSelectedKind(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                >
+                  <option value="all">All Types</option>
+                  <option value="video">Videos</option>
+                  <option value="site">Websites</option>
+                  <option value="deck">Flashcards</option>
+                  <option value="doc">Documents</option>
+                </select>
                 
-                <div className="flex gap-2 flex-wrap">
-                  <select
-                    value={selectedKind}
-                    onChange={(e) => setSelectedKind(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                  >
-                    <option value="all">All Types</option>
-                    <option value="video">Videos</option>
-                    <option value="site">Websites</option>
-                    <option value="deck">Flashcards</option>
-                    <option value="doc">Documents</option>
-                  </select>
-                  
-                  <select
-                    value={selectedWeek || ''}
-                    onChange={(e) => setSelectedWeek(e.target.value ? Number(e.target.value) : null)}
-                    className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                  >
-                    <option value="">All Weeks</option>
-                    {getUniqueWeeks().map(weekNum => (
-                      <option key={weekNum} value={weekNum}>Week {weekNum}</option>
-                    ))}
-                  </select>
-                </div>
+                <select
+                  value={selectedWeek || ''}
+                  onChange={(e) => setSelectedWeek(e.target.value ? Number(e.target.value) : null)}
+                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                >
+                  <option value="">All Weeks</option>
+                  {getUniqueWeeks().map(weekNum => (
+                    <option key={weekNum} value={weekNum}>Week {weekNum}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Resources by Week */}
+        <div className="space-y-6">
+          {Object.entries(groupedResources).map(([weekNum, weekData]) => {
+            const weekNumber = Number(weekNum)
+            const isExpanded = expandedWeeks.has(weekNumber)
+            
+            return (
+              <Card key={weekNumber} className="overflow-hidden">
+                <CardHeader 
+                  className="cursor-pointer"
+                  onClick={() => toggleWeek(weekNumber)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {isExpanded ? (
+                        <ChevronDown className="h-5 w-5" />
+                      ) : (
+                        <ChevronRight className="h-5 w-5" />
+                      )}
+                      <CardTitle className="text-xl">
+                        {weekData.weekInfo.title}
+                      </CardTitle>
+                      <Badge variant="outline">
+                        {Object.keys(weekData.days).length} days
+                      </Badge>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {Object.values(weekData.days).reduce((sum: number, day: any) => sum + day.resources.length, 0)} resources
+                    </div>
+                  </div>
+                </CardHeader>
+
+                {isExpanded && (
+                  <CardContent className="pt-0">
+                    <div className="space-y-4">
+                      {Object.entries(weekData.days).map(([dayId, dayData]: [string, any]) => {
+                        const isDayExpanded = expandedDays.has(dayId)
+                        
+                        return (
+                          <Card key={dayId} className="border-l-4 border-l-blue-500">
+                            <CardHeader 
+                              className="cursor-pointer pb-3"
+                              onClick={() => toggleDay(dayId)}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  {isDayExpanded ? (
+                                    <ChevronDown className="h-4 w-4" />
+                                  ) : (
+                                    <ChevronRight className="h-4 w-4" />
+                                  )}
+                                  <h4 className="font-medium">{dayData.dayInfo.title}</h4>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {dayData.resources.length} resources
+                                  </Badge>
+                                </div>
+                              </div>
+                            </CardHeader>
+
+                            {isDayExpanded && (
+                              <CardContent className="pt-0">
+                                <div className="space-y-4">
+                                  {dayData.resources.map((item: TaskResource) => (
+                                    <div key={`${item.task_id}-${item.resource_id}`} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
+                                      <div className="flex items-start gap-3">
+                                        <div className="flex-shrink-0 mt-1">
+                                          {getResourceIcon(item.resources.kind)}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                          <div className="flex items-center gap-2 mb-2">
+                                            <h5 className="font-medium text-sm">{item.resources.title}</h5>
+                                            <Badge variant="outline" className={`text-xs ${getResourceColor(item.resources.kind)}`}>
+                                              {getResourceLabel(item.resources.kind)}
+                                            </Badge>
+                                            <Badge variant="outline" className={`text-xs ${getCategoryColor(item.tasks.category)}`}>
+                                              {item.tasks.category}
+                                            </Badge>
+                                          </div>
+                                          
+                                          {item.resources.description && (
+                                            <p className="text-sm text-muted-foreground mb-2">
+                                              {item.resources.description}
+                                            </p>
+                                          )}
+                                          
+                                          <div className="flex items-center gap-2 mb-3">
+                                            <span className="text-xs text-muted-foreground">
+                                              For task: {item.tasks.label}
+                                            </span>
+                                            <div className="flex gap-1">
+                                              {Array.from({ length: item.tasks.points }, (_, i) => (
+                                                <div key={i} className="w-2 h-2 bg-yellow-400 rounded-full" />
+                                              ))}
+                                            </div>
+                                          </div>
+                                          
+                                          <Button
+                                            asChild
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 text-xs"
+                                          >
+                                            <a
+                                              href={item.resources.url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="flex items-center gap-1"
+                                            >
+                                              <ExternalLink className="h-3 w-3" />
+                                              Open Resource
+                                            </a>
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </CardContent>
+                            )}
+                          </Card>
+                        )
+                      })}
+                    </div>
+                  </CardContent>
+                )}
+              </Card>
+            )
+          })}
+        </div>
+
+        {filteredResources.length === 0 && (
+          <Card>
+            <CardContent className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-600 mb-2">
+                  No resources found
+                </h3>
+                <p className="text-gray-500">
+                  Try adjusting your search terms or filters
+                </p>
               </div>
             </CardContent>
           </Card>
-
-          {/* Resources by Week */}
-          <div className="space-y-6">
-            {Object.entries(groupedResources).map(([weekNum, weekData]) => {
-              const weekNumber = Number(weekNum)
-              const isExpanded = expandedWeeks.has(weekNumber)
-              
-              return (
-                <Card key={weekNumber} className="overflow-hidden">
-                  <CardHeader 
-                    className="cursor-pointer"
-                    onClick={() => toggleWeek(weekNumber)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        {isExpanded ? (
-                          <ChevronDown className="h-5 w-5" />
-                        ) : (
-                          <ChevronRight className="h-5 w-5" />
-                        )}
-                        <CardTitle className="text-xl">
-                          {weekData.weekInfo.title}
-                        </CardTitle>
-                        <Badge variant="outline">
-                          {Object.keys(weekData.days).length} days
-                        </Badge>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {Object.values(weekData.days).reduce((sum: number, day: any) => sum + day.resources.length, 0)} resources
-                      </div>
-                    </div>
-                  </CardHeader>
-
-                  {isExpanded && (
-                    <CardContent className="pt-0">
-                      <div className="space-y-4">
-                        {Object.entries(weekData.days).map(([dayId, dayData]: [string, any]) => {
-                          const isDayExpanded = expandedDays.has(dayId)
-                          
-                          return (
-                            <Card key={dayId} className="border-l-4 border-l-blue-500">
-                              <CardHeader 
-                                className="cursor-pointer pb-3"
-                                onClick={() => toggleDay(dayId)}
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    {isDayExpanded ? (
-                                      <ChevronDown className="h-4 w-4" />
-                                    ) : (
-                                      <ChevronRight className="h-4 w-4" />
-                                    )}
-                                    <h4 className="font-medium">{dayData.dayInfo.title}</h4>
-                                    <Badge variant="secondary" className="text-xs">
-                                      {dayData.resources.length} resources
-                                    </Badge>
-                                  </div>
-                                </div>
-                              </CardHeader>
-
-                              {isDayExpanded && (
-                                <CardContent className="pt-0">
-                                  <div className="space-y-4">
-                                    {dayData.resources.map((item: TaskResource) => (
-                                      <div key={`${item.task_id}-${item.resource_id}`} className="border rounded-lg p-4 hover:bg-muted/50 transition-colors">
-                                        <div className="flex items-start gap-3">
-                                          <div className="flex-shrink-0 mt-1">
-                                            {getResourceIcon(item.resources.kind)}
-                                          </div>
-                                          <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-2">
-                                              <h5 className="font-medium text-sm">{item.resources.title}</h5>
-                                              <Badge variant="outline" className={`text-xs ${getResourceColor(item.resources.kind)}`}>
-                                                {getResourceLabel(item.resources.kind)}
-                                              </Badge>
-                                              <Badge variant="outline" className={`text-xs ${getCategoryColor(item.tasks.category)}`}>
-                                                {item.tasks.category}
-                                              </Badge>
-                                            </div>
-                                            
-                                            {item.resources.description && (
-                                              <p className="text-sm text-muted-foreground mb-2">
-                                                {item.resources.description}
-                                              </p>
-                                            )}
-                                            
-                                            <div className="flex items-center gap-2 mb-3">
-                                              <span className="text-xs text-muted-foreground">
-                                                For task: {item.tasks.label}
-                                              </span>
-                                              <div className="flex gap-1">
-                                                {Array.from({ length: item.tasks.points }, (_, i) => (
-                                                  <div key={i} className="w-2 h-2 bg-yellow-400 rounded-full" />
-                                                ))}
-                                              </div>
-                                            </div>
-                                            
-                                            <Button
-                                              asChild
-                                              variant="outline"
-                                              size="sm"
-                                              className="h-8 text-xs"
-                                            >
-                                              <a
-                                                href={item.resources.url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="flex items-center gap-1"
-                                              >
-                                                <ExternalLink className="h-3 w-3" />
-                                                Open Resource
-                                              </a>
-                                            </Button>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </CardContent>
-                              )}
-                            </Card>
-                          )
-                        })}
-                      </div>
-                    </CardContent>
-                  )}
-                </Card>
-              )
-            })}
-          </div>
-
-          {filteredResources.length === 0 && (
-            <Card>
-              <CardContent className="flex items-center justify-center py-12">
-                <div className="text-center">
-                  <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-600 mb-2">
-                    No resources found
-                  </h3>
-                  <p className="text-gray-500">
-                    Try adjusting your search terms or filters
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
+        )}
       </div>
     </div>
   )
