@@ -11,32 +11,44 @@ interface SyncStatus {
 class OfflineSyncService {
   private supabase = createClient()
   private syncStatus: SyncStatus = {
-    isOnline: navigator.onLine,
+    isOnline: typeof window !== 'undefined' ? navigator.onLine : true,
     lastSync: null,
     pendingChanges: 0,
     isSyncing: false
   }
   private listeners: Array<(status: SyncStatus) => void> = []
+  private syncInterval: NodeJS.Timeout | null = null
 
   constructor() {
-    // Listen for online/offline events
-    window.addEventListener('online', () => {
-      this.syncStatus.isOnline = true
-      this.notifyListeners()
-      this.syncPendingChanges()
-    })
-
-    window.addEventListener('offline', () => {
-      this.syncStatus.isOnline = false
-      this.notifyListeners()
-    })
-
-    // Periodic sync when online
-    setInterval(() => {
-      if (this.syncStatus.isOnline && this.syncStatus.pendingChanges > 0) {
+    // Only initialize browser-specific features on client side
+    if (typeof window !== 'undefined') {
+      // Listen for online/offline events
+      window.addEventListener('online', () => {
+        this.syncStatus.isOnline = true
+        this.notifyListeners()
         this.syncPendingChanges()
-      }
-    }, 30000) // Sync every 30 seconds
+      })
+
+      window.addEventListener('offline', () => {
+        this.syncStatus.isOnline = false
+        this.notifyListeners()
+      })
+
+      // Periodic sync when online
+      this.syncInterval = setInterval(() => {
+        if (this.syncStatus.isOnline && this.syncStatus.pendingChanges > 0) {
+          this.syncPendingChanges()
+        }
+      }, 30000) // Sync every 30 seconds
+    }
+  }
+
+  // Cleanup method
+  destroy() {
+    if (this.syncInterval) {
+      clearInterval(this.syncInterval)
+      this.syncInterval = null
+    }
   }
 
   // Subscribe to sync status changes
@@ -55,17 +67,20 @@ class OfflineSyncService {
   // Save progress locally and queue for sync
   async saveProgress(progress: Progress): Promise<void> {
     try {
-      // Save to localStorage immediately
-      const localProgress = this.getLocalProgress()
-      const existingIndex = localProgress.findIndex(p => p.task_id === progress.task_id)
-      
-      if (existingIndex >= 0) {
-        localProgress[existingIndex] = progress
-      } else {
-        localProgress.push(progress)
+      // Only save to localStorage on client side
+      if (typeof window !== 'undefined') {
+        // Save to localStorage immediately
+        const localProgress = this.getLocalProgress()
+        const existingIndex = localProgress.findIndex(p => p.task_id === progress.task_id)
+        
+        if (existingIndex >= 0) {
+          localProgress[existingIndex] = progress
+        } else {
+          localProgress.push(progress)
+        }
+        
+        localStorage.setItem('jlpt-n5-progress', JSON.stringify(localProgress))
       }
-      
-      localStorage.setItem('jlpt-n5-progress', JSON.stringify(localProgress))
       
       // Add to pending changes
       this.syncStatus.pendingChanges++
@@ -83,10 +98,13 @@ class OfflineSyncService {
   // Remove progress locally and queue for sync
   async removeProgress(taskId: string): Promise<void> {
     try {
-      // Remove from localStorage
-      const localProgress = this.getLocalProgress()
-      const filteredProgress = localProgress.filter(p => p.task_id !== taskId)
-      localStorage.setItem('jlpt-n5-progress', JSON.stringify(filteredProgress))
+      // Only remove from localStorage on client side
+      if (typeof window !== 'undefined') {
+        // Remove from localStorage
+        const localProgress = this.getLocalProgress()
+        const filteredProgress = localProgress.filter(p => p.task_id !== taskId)
+        localStorage.setItem('jlpt-n5-progress', JSON.stringify(filteredProgress))
+      }
       
       // Add to pending changes
       this.syncStatus.pendingChanges++
@@ -104,6 +122,9 @@ class OfflineSyncService {
   // Get all progress from localStorage
   getLocalProgress(): Progress[] {
     try {
+      if (typeof window === 'undefined') {
+        return []
+      }
       const stored = localStorage.getItem('jlpt-n5-progress')
       return stored ? JSON.parse(stored) : []
     } catch (error) {
@@ -214,7 +235,7 @@ class OfflineSyncService {
       }
 
       // Update local storage with server data
-      if (data) {
+      if (data && typeof window !== 'undefined') {
         localStorage.setItem('jlpt-n5-progress', JSON.stringify(data))
         this.syncStatus.lastSync = new Date().toISOString()
         this.notifyListeners()
@@ -241,7 +262,9 @@ class OfflineSyncService {
 
   // Clear all local data
   clearLocalData(): void {
-    localStorage.removeItem('jlpt-n5-progress')
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('jlpt-n5-progress')
+    }
     this.syncStatus.pendingChanges = 0
     this.syncStatus.lastSync = null
     this.notifyListeners()

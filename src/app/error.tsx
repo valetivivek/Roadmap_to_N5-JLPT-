@@ -40,7 +40,11 @@ export default function Error({
               <RefreshCw className="h-4 w-4 mr-2" />
               Try again
             </Button>
-            <Button variant="outline" onClick={() => window.location.href = '/'} className="w-full">
+            <Button variant="outline" onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.location.href = '/'
+              }
+            }} className="w-full">
               Go home
             </Button>
           </div>
